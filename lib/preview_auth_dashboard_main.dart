@@ -48,13 +48,10 @@ class AuthDashboardPreview extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Admin dashboard is not integrated yet.',
-                    ),
+                    const Text('Admin dashboard is not integrated yet.'),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () =>
-                          context.read<AuthCubit>().signOut(),
+                      onPressed: () => context.read<AuthCubit>().signOut(),
                       child: const Text('Sign out'),
                     ),
                   ],
@@ -67,7 +64,7 @@ class AuthDashboardPreview extends StatelessWidget {
         return const MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Campus Safety Reporter',
-          home: LoginPage(),
+          home: LoginPage(demoMode: true),
         );
       },
     );
