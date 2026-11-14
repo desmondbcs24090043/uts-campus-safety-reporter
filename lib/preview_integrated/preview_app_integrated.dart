@@ -27,7 +27,12 @@ String _formatReportDate(DateTime date) {
 // Member 2 V2 UI integration: original V1 design with V2 BLoC data.
 // This is an independent demo; no Authentication or Supabase integration.
 class CampusSafetyIntegratedPreviewApp extends StatelessWidget {
-  const CampusSafetyIntegratedPreviewApp({super.key});
+  const CampusSafetyIntegratedPreviewApp({
+  super.key,
+  this.onSignOut,
+});
+
+final VoidCallback? onSignOut;
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +40,15 @@ class CampusSafetyIntegratedPreviewApp extends StatelessWidget {
       title: 'Campus Safety Reporter · Demo',
       debugShowCheckedModeBanner: false,
       theme: buildPreviewTheme(),
-      home: const _PreviewShell(),
+      home: _PreviewShell(onSignOut: onSignOut),
     );
   }
 }
 
 class _PreviewShell extends StatefulWidget {
-  const _PreviewShell();
+  const _PreviewShell({this.onSignOut});
+
+  final VoidCallback? onSignOut;
 
   @override
   State<_PreviewShell> createState() => _PreviewShellState();
@@ -100,7 +107,13 @@ class _PreviewShellState extends State<_PreviewShell> {
                 onNotifications: () => _showNotReady('Notifications', 'The notifications team'),
               ),
               _MyReportsScreen(onOpenReport: _openDetails),
-              _ProfileScreen(onAuth: () => _showNotReady('Profile and Authentication', 'Member 1')),
+              _ProfileScreen(
+                onAuth: () => _showNotReady(
+                  'Profile and Authentication',
+                  'Member 1',
+                ),
+                onSignOut: widget.onSignOut,
+              ),
             ],
           ),
         ),
@@ -740,8 +753,13 @@ class _StatusTimeline extends StatelessWidget {
 }
 
 class _ProfileScreen extends StatelessWidget {
-  const _ProfileScreen({required this.onAuth});
+  const _ProfileScreen({
+    required this.onAuth,
+    this.onSignOut,
+  });
+
   final VoidCallback onAuth;
+  final VoidCallback? onSignOut;
 
   @override
   Widget build(BuildContext context) => SafeArea(child: ListView(
@@ -760,14 +778,34 @@ class _ProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
           const Text('Student account', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          const Text('Profile data and secure sign-in will be provided by Member 1. This screen does not authenticate a user.',
-            style: TextStyle(color: PreviewColours.muted, height: 1.5)),
+          Text(
+            onSignOut == null
+             ? 'Profile data and secure sign-in will be provided by Member 1. This screen does not authenticate a user.'
+             : 'Signed in with a demo account. Supabase authentication is not connected yet.',
+          style: const TextStyle(
+          color: PreviewColours.muted,
+          height: 1.5,
+        ),
+      ),
           const SizedBox(height: 17),
           OutlinedButton.icon(
-            key: const Key('profile-placeholder'),
-            onPressed: onAuth,
-            icon: const Icon(Icons.lock_outline_rounded, size: 18),
-            label: const Text('Authentication integration'),
+            key: Key(
+              onSignOut == null
+                  ? 'profile-placeholder'
+                  : 'profile-sign-out',
+            ),
+            onPressed: onSignOut ?? onAuth,
+            icon: Icon(
+              onSignOut == null
+                  ? Icons.lock_outline_rounded
+                  : Icons.logout_rounded,
+              size: 18,
+            ),
+            label: Text(
+              onSignOut == null
+                  ? 'Authentication integration'
+                  : 'Sign out',
+            ),
           ),
         ]),
       ),
