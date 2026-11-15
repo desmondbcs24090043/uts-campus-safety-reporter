@@ -5,6 +5,7 @@ import '../features/reports/presentation/reports_bloc.dart';
 import '../features/reports/presentation/reports_event.dart';
 import '../features/reports/presentation/reports_state.dart';
 import '../preview/preview_theme.dart';
+import '../preview/report_issue_ui.dart';
 
 // Presentation-only icon mapping. ReportRecord stays API-neutral.
 IconData _iconForReport(ReportRecord report) => switch (report.title) {
@@ -101,7 +102,7 @@ class _PreviewShellState extends State<_PreviewShell> {
             index: _selectedIndex,
             children: [
               _HomeScreen(
-                onReportIssue: () => _showNotReady('Report an Issue', 'Member 3'),
+                onReportIssue: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ReportIssuePreviewPage())),
                 onViewAll: () => setState(() => _selectedIndex = 1),
                 onOpenReport: _openDetails,
                 onNotifications: () => _showNotReady('Notifications', 'The notifications team'),
@@ -272,7 +273,6 @@ class _ReportHeroCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [PreviewColours.navy, Color(0xFF3271CB)],
             ),
-            boxShadow: [BoxShadow(color: PreviewColours.navy.withValues(alpha: .18), offset: const Offset(0, 10), blurRadius: 22)],
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(21, 26, 19, 26),

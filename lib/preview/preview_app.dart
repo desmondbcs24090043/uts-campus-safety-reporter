@@ -211,7 +211,6 @@ class _ReportHeroCard extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [PreviewColours.navy, Color(0xFF3271CB)],
             ),
-            boxShadow: [BoxShadow(color: PreviewColours.navy.withValues(alpha: .18), offset: const Offset(0, 10), blurRadius: 22)],
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(21, 26, 19, 26),
