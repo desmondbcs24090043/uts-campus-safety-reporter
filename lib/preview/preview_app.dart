@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'demo_data.dart';
 import 'preview_theme.dart';
+import 'app_appearance.dart';
 
 // MEMBER 2 - independent UI preview only. All reports are fictional.
 // Do not use this entry point for authentication, upload, or production data.
@@ -9,11 +11,16 @@ class CampusSafetyPreviewApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Campus Safety Reporter · Demo',
-      debugShowCheckedModeBanner: false,
-      theme: buildPreviewTheme(),
-      home: const _PreviewShell(),
+    return ValueListenableBuilder<bool>(
+      valueListenable: AppAppearance.darkMode,
+      builder: (context, dark, _) => MaterialApp(
+        title: 'Campus Safety Reporter · Demo',
+        debugShowCheckedModeBanner: false,
+        theme: buildPreviewTheme(dark: false),
+        darkTheme: buildPreviewTheme(dark: true),
+        themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+        home: const _PreviewShell(),
+      ),
     );
   }
 }
@@ -32,8 +39,10 @@ class _PreviewShellState extends State<_PreviewShell> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      backgroundColor: AdaptivePalette.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (sheetContext) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(26, 10, 26, 30),
@@ -41,14 +50,26 @@ class _PreviewShellState extends State<_PreviewShell> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.construction_rounded, size: 30, color: PreviewColours.blue),
+              Icon(
+                Icons.construction_rounded,
+                size: 30,
+                color: AdaptivePalette.blue,
+              ),
               const SizedBox(height: 14),
-              Text('$feature is not connected yet', style: Theme.of(sheetContext).textTheme.titleLarge),
+              Text(
+                '$feature is not connected yet',
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
               const SizedBox(height: 10),
-              Text('This is a Member 2 UI preview with demonstration data. $owner will integrate this feature later.',
-                style: const TextStyle(color: PreviewColours.muted, height: 1.5)),
+              Text(
+                'This is a Member 2 UI preview with demonstration data. $owner will integrate this feature later.',
+                style: TextStyle(color: AdaptivePalette.muted, height: 1.5),
+              ),
               const SizedBox(height: 18),
-              FilledButton(onPressed: () => Navigator.pop(sheetContext), child: const Text('Got it')),
+              FilledButton(
+                onPressed: () => Navigator.pop(sheetContext),
+                child: const Text('Got it'),
+              ),
             ],
           ),
         ),
@@ -57,9 +78,11 @@ class _PreviewShellState extends State<_PreviewShell> {
   }
 
   void _openDetails(DemoReport report) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => _ReportDetailsScreen(report: report),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _ReportDetailsScreen(report: report),
+      ),
+    );
   }
 
   @override
@@ -72,21 +95,26 @@ class _PreviewShellState extends State<_PreviewShell> {
             index: _selectedIndex,
             children: [
               _HomeScreen(
-                onReportIssue: () => _showNotReady('Report an Issue', 'Member 3'),
+                onReportIssue: () =>
+                    _showNotReady('Report an Issue', 'Member 3'),
                 onViewAll: () => setState(() => _selectedIndex = 1),
                 onOpenReport: _openDetails,
-                onNotifications: () => _showNotReady('Notifications', 'The notifications team'),
+                onNotifications: () =>
+                    _showNotReady('Notifications', 'The notifications team'),
               ),
               _MyReportsScreen(onOpenReport: _openDetails),
-              _ProfileScreen(onAuth: () => _showNotReady('Profile and Authentication', 'Member 1')),
+              _ProfileScreen(
+                onAuth: () =>
+                    _showNotReady('Profile and Authentication', 'Member 1'),
+              ),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: PreviewColours.border)),
+        decoration: BoxDecoration(
+          color: AdaptivePalette.surface,
+          border: Border(top: BorderSide(color: AdaptivePalette.border)),
         ),
         child: SafeArea(
           top: false,
@@ -96,11 +124,27 @@ class _PreviewShellState extends State<_PreviewShell> {
               constraints: const BoxConstraints(maxWidth: 540),
               child: NavigationBar(
                 selectedIndex: _selectedIndex,
-                onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+                onDestinationSelected: (index) =>
+                    setState(() => _selectedIndex = index),
                 destinations: const [
-                  NavigationDestination(key: Key('nav-home'), icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Home'),
-                  NavigationDestination(key: Key('nav-reports'), icon: Icon(Icons.description_outlined), selectedIcon: Icon(Icons.description_rounded), label: 'My Reports'),
-                  NavigationDestination(key: Key('nav-profile'), icon: Icon(Icons.person_outline_rounded), selectedIcon: Icon(Icons.person_rounded), label: 'Profile'),
+                  NavigationDestination(
+                    key: Key('nav-home'),
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home_rounded),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    key: Key('nav-reports'),
+                    icon: Icon(Icons.description_outlined),
+                    selectedIcon: Icon(Icons.description_rounded),
+                    label: 'My Reports',
+                  ),
+                  NavigationDestination(
+                    key: Key('nav-profile'),
+                    icon: Icon(Icons.person_outline_rounded),
+                    selectedIcon: Icon(Icons.person_rounded),
+                    label: 'Profile',
+                  ),
                 ],
               ),
             ),
@@ -127,7 +171,8 @@ class _HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recent = demoReports.take(3).toList();
-    int count(ReportStatus status) => demoReports.where((r) => r.status == status).length;
+    int count(ReportStatus status) =>
+        demoReports.where((r) => r.status == status).length;
 
     return SafeArea(
       child: ListView(
@@ -137,17 +182,43 @@ class _HomeScreen extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(color: PreviewColours.navy, borderRadius: BorderRadius.circular(13)),
-                child: const Icon(Icons.shield_outlined, color: Colors.white, size: 23),
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AdaptivePalette.heroNavy,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  color: Colors.white,
+                  size: 23,
+                ),
               ),
               const SizedBox(width: 10),
-              const Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('CAMPUS SAFETY', style: TextStyle(fontSize: 10, letterSpacing: 1.7, fontWeight: FontWeight.w800, color: PreviewColours.muted)),
-                  SizedBox(height: 3),
-                  Text('Reporter', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: PreviewColours.ink)),
-                ]),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CAMPUS SAFETY',
+                      style: TextStyle(
+                        fontSize: 10,
+                        letterSpacing: 1.7,
+                        fontWeight: FontWeight.w800,
+                        color: AdaptivePalette.muted,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Reporter',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AdaptivePalette.ink,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const _DemoPill(),
               const SizedBox(width: 7),
@@ -155,34 +226,88 @@ class _HomeScreen extends StatelessWidget {
                 key: const Key('notifications-button'),
                 tooltip: 'Notifications (coming soon)',
                 onPressed: onNotifications,
-                icon: const Icon(Icons.notifications_none_rounded, color: PreviewColours.navy),
+                icon: Icon(
+                  Icons.notifications_none_rounded,
+                  color: AdaptivePalette.navy,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 29),
-          Text('Hello, Student 👋', style: Theme.of(context).textTheme.headlineMedium),
+          Text(
+            'Hello, Student 👋',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           const SizedBox(height: 9),
-          const Text('A safer campus starts with us. Check the latest updates or report an issue.',
-            style: TextStyle(color: PreviewColours.muted, fontSize: 14, height: 1.5)),
+          Text(
+            'A safer campus starts with us. Check the latest updates or report an issue.',
+            style: TextStyle(
+              color: AdaptivePalette.muted,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
           const SizedBox(height: 26),
           _ReportHeroCard(onPressed: onReportIssue),
           const SizedBox(height: 30),
-          _SectionHeading(title: 'My Reports', trailing: 'View all', onTrailing: onViewAll),
+          _SectionHeading(
+            title: 'My Reports',
+            trailing: 'View all',
+            onTrailing: onViewAll,
+          ),
           const SizedBox(height: 15),
-          Row(children: [
-            Expanded(child: _StatTile(count: count(ReportStatus.pending), title: 'Pending', icon: Icons.schedule_rounded, background: PreviewColours.pendingBg, foreground: PreviewColours.pending)),
-            const SizedBox(width: 10),
-            Expanded(child: _StatTile(count: count(ReportStatus.inProgress), title: 'In Progress', icon: Icons.autorenew_rounded, background: PreviewColours.progressBg, foreground: PreviewColours.progress)),
-            const SizedBox(width: 10),
-            Expanded(child: _StatTile(count: count(ReportStatus.resolved), title: 'Resolved', icon: Icons.check_circle_outline_rounded, background: PreviewColours.resolvedBg, foreground: PreviewColours.resolved)),
-          ]),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _StatTile(
+                    count: count(ReportStatus.pending),
+                    title: 'Pending',
+                    icon: Icons.schedule_rounded,
+                    background: AdaptivePalette.pendingBg,
+                    foreground: AdaptivePalette.pending,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _StatTile(
+                    count: count(ReportStatus.inProgress),
+                    title: 'In Progress',
+                    icon: Icons.autorenew_rounded,
+                    background: AdaptivePalette.progressBg,
+                    foreground: AdaptivePalette.progress,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _StatTile(
+                    count: count(ReportStatus.resolved),
+                    title: 'Resolved',
+                    icon: Icons.check_circle_outline_rounded,
+                    background: AdaptivePalette.resolvedBg,
+                    foreground: AdaptivePalette.resolved,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 31),
-          _SectionHeading(title: 'Recent Reports', trailing: 'View all', onTrailing: onViewAll),
+          _SectionHeading(
+            title: 'Recent Reports',
+            trailing: 'View all',
+            onTrailing: onViewAll,
+          ),
           const SizedBox(height: 14),
-          ...recent.map((report) => Padding(
-            padding: const EdgeInsets.only(bottom: 11),
-            child: _ReportCard(report: report, onTap: () => onOpenReport(report)),
-          )),
+          ...recent.map(
+            (report) => Padding(
+              padding: const EdgeInsets.only(bottom: 11),
+              child: _ReportCard(
+                report: report,
+                onTap: () => onOpenReport(report),
+              ),
+            ),
+          ),
           const SizedBox(height: 8),
           const _DemoNotice(),
         ],
@@ -206,29 +331,62 @@ class _ReportHeroCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [PreviewColours.navy, Color(0xFF3271CB)],
+              colors: [AdaptivePalette.heroNavy, Color(0xFF3271CB)],
             ),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(21, 26, 19, 26),
-            child: Row(children: [
-              Container(
-                width: 53, height: 53,
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: .14), borderRadius: BorderRadius.circular(17)),
-                child: const Icon(Icons.campaign_outlined, color: Colors.white, size: 27),
-              ),
-              const SizedBox(width: 14),
-              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Report an Issue', style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
-                SizedBox(height: 7),
-                Text('Submit an issue with photos and location details.', style: TextStyle(color: Color(0xFFE3EDFF), fontSize: 12, height: 1.45)),
-              ])),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 17),
-            ]),
+            child: Row(
+              children: [
+                Container(
+                  width: 53,
+                  height: 53,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .14),
+                    borderRadius: BorderRadius.circular(17),
+                  ),
+                  child: const Icon(
+                    Icons.campaign_outlined,
+                    color: Colors.white,
+                    size: 27,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Report an Issue',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: 7),
+                      Text(
+                        'Submit an issue with photos and location details.',
+                        style: TextStyle(
+                          color: Color(0xFFE3EDFF),
+                          fontSize: 12,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: 17,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -237,7 +395,13 @@ class _ReportHeroCard extends StatelessWidget {
 }
 
 class _StatTile extends StatelessWidget {
-  const _StatTile({required this.count, required this.title, required this.icon, required this.background, required this.foreground});
+  const _StatTile({
+    required this.count,
+    required this.title,
+    required this.icon,
+    required this.background,
+    required this.foreground,
+  });
   final int count;
   final String title;
   final IconData icon;
@@ -247,37 +411,77 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 115,
+      constraints: const BoxConstraints(minHeight: 115),
       padding: const EdgeInsets.fromLTRB(13, 13, 7, 12),
-      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(19)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Icon(icon, color: foreground, size: 20),
-        const Spacer(),
-        Text('$count', style: TextStyle(color: foreground, fontSize: 27, fontWeight: FontWeight.w800, height: 1)),
-        const SizedBox(height: 6),
-        Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: foreground, fontSize: 11.5, fontWeight: FontWeight.w700)),
-      ]),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(19),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: foreground, size: 20),
+          const Spacer(),
+          Text(
+            '$count',
+            style: TextStyle(
+              color: foreground,
+              fontSize: 27,
+              fontWeight: FontWeight.w800,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: TextStyle(
+              color: foreground,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _SectionHeading extends StatelessWidget {
-  const _SectionHeading({required this.title, required this.trailing, required this.onTrailing});
+  const _SectionHeading({
+    required this.title,
+    required this.trailing,
+    required this.onTrailing,
+  });
   final String title;
   final String trailing;
   final VoidCallback onTrailing;
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge)),
-      TextButton(onPressed: onTrailing, child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text(trailing, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-        const SizedBox(width: 4),
-        const Icon(Icons.arrow_forward_rounded, size: 16),
-      ])),
-    ]);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+        ),
+        TextButton(
+          onPressed: onTrailing,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                trailing,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.arrow_forward_rounded, size: 16),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -315,7 +519,11 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
     final query = _controller.text.trim().toLowerCase();
     return demoReports.where((report) {
       final matchesStatus = _filter == null || report.status == _filter;
-      final matchesQuery = query.isEmpty || '${report.id} ${report.title} ${report.category} ${report.location}'.toLowerCase().contains(query);
+      final matchesQuery =
+          query.isEmpty ||
+          '${report.id} ${report.title} ${report.category} ${report.location}'
+              .toLowerCase()
+              .contains(query);
       return matchesStatus && matchesQuery;
     }).toList();
   }
@@ -323,96 +531,180 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = _filteredReports;
-    return SafeArea(child: ListView(
-      key: const Key('my-reports-list'),
-      padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
-      children: [
-        Row(children: [
-          const Expanded(child: Text('MY ACTIVITY', style: TextStyle(letterSpacing: 1.7, fontWeight: FontWeight.w800, color: PreviewColours.muted, fontSize: 10))),
-          const _DemoPill(),
-        ]),
-        const SizedBox(height: 13),
-        Text('My Reports', style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 9),
-        const Text('Find your submitted reports and follow their status.', style: TextStyle(color: PreviewColours.muted, fontSize: 13.5)),
-        const SizedBox(height: 22),
-        TextField(
-          key: const Key('reports-search'),
-          controller: _controller,
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search_rounded, color: PreviewColours.muted),
-            hintText: 'Search by report ID or issue',
-            suffixIcon: _controller.text.isEmpty ? null : IconButton(
-              tooltip: 'Clear search',
-              onPressed: _controller.clear,
-              icon: const Icon(Icons.clear_rounded, size: 20),
-            ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(children: [
-            _FilterChip(label: 'All', selected: _filter == null, onPressed: () => setState(() => _filter = null), key: const Key('filter-all')),
-            const SizedBox(width: 8),
-            _FilterChip(label: 'Pending', selected: _filter == ReportStatus.pending, onPressed: () => setState(() => _filter = ReportStatus.pending), key: const Key('filter-pending')),
-            const SizedBox(width: 8),
-            _FilterChip(label: 'In Progress', selected: _filter == ReportStatus.inProgress, onPressed: () => setState(() => _filter = ReportStatus.inProgress), key: const Key('filter-progress')),
-            const SizedBox(width: 8),
-            _FilterChip(label: 'Resolved', selected: _filter == ReportStatus.resolved, onPressed: () => setState(() => _filter = ReportStatus.resolved), key: const Key('filter-resolved')),
-          ]),
-        ),
-        const SizedBox(height: 24),
-        Row(children: [
-          Text('All activity', style: Theme.of(context).textTheme.titleMedium),
-          const Spacer(),
-          if (_viewMode == _ReportViewMode.populated)
-            Text('${filtered.length} reports', style: const TextStyle(color: PreviewColours.muted, fontSize: 12, fontWeight: FontWeight.w600)),
-          PopupMenuButton<_ReportViewMode>(
-            key: const Key('preview-states-menu'),
-            tooltip: 'Preview loading, empty and error UI states',
-            icon: const Icon(Icons.more_vert_rounded, size: 20, color: PreviewColours.muted),
-            onSelected: (mode) => setState(() => _viewMode = mode),
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: _ReportViewMode.populated, child: Text('Show demo reports')),
-              PopupMenuItem(value: _ReportViewMode.loading, child: Text('Preview loading state')),
-              PopupMenuItem(value: _ReportViewMode.empty, child: Text('Preview empty state')),
-              PopupMenuItem(value: _ReportViewMode.error, child: Text('Preview error state')),
+    return SafeArea(
+      child: ListView(
+        key: const Key('my-reports-list'),
+        padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'MY ACTIVITY',
+                  style: TextStyle(
+                    letterSpacing: 1.7,
+                    fontWeight: FontWeight.w800,
+                    color: AdaptivePalette.muted,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              const _DemoPill(),
             ],
           ),
-        ]),
-        const SizedBox(height: 13),
-        if (_viewMode == _ReportViewMode.loading)
-          const _PreviewMessageState(
-            title: 'Loading reports',
-            description: 'This shows the future loading state of the live API.',
-            showProgress: true,
-          )
-        else if (_viewMode == _ReportViewMode.empty)
-          const _EmptyResults()
-        else if (_viewMode == _ReportViewMode.error)
-          const _PreviewMessageState(
-            title: 'Unable to load reports',
-            description: 'A network or API error message will appear here after backend integration.',
-            icon: Icons.wifi_off_rounded,
-          )
-        else if (filtered.isEmpty)
-          const _EmptyResults()
-        else
-          ...filtered.map((report) => Padding(
-            padding: const EdgeInsets.only(bottom: 11),
-            child: _ReportCard(report: report, onTap: () => widget.onOpenReport(report)),
-          )),
-        const SizedBox(height: 17),
-        const _DemoNotice(),
-      ],
-    ));
+          const SizedBox(height: 13),
+          Text('My Reports', style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 9),
+          Text(
+            'Find your submitted reports and follow their status.',
+            style: TextStyle(color: AdaptivePalette.muted, fontSize: 13.5),
+          ),
+          const SizedBox(height: 22),
+          TextField(
+            key: const Key('reports-search'),
+            controller: _controller,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: AdaptivePalette.muted,
+              ),
+              hintText: 'Search by report ID or issue',
+              hintMaxLines: 2,
+              suffixIcon: _controller.text.isEmpty
+                  ? null
+                  : IconButton(
+                      tooltip: 'Clear search',
+                      onPressed: _controller.clear,
+                      icon: const Icon(Icons.clear_rounded, size: 20),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _FilterChip(
+                label: 'All',
+                selected: _filter == null,
+                onPressed: () => setState(() => _filter = null),
+                key: const Key('filter-all'),
+              ),
+              _FilterChip(
+                label: 'Pending',
+                selected: _filter == ReportStatus.pending,
+                onPressed: () =>
+                    setState(() => _filter = ReportStatus.pending),
+                key: const Key('filter-pending'),
+              ),
+              _FilterChip(
+                label: 'In Progress',
+                selected: _filter == ReportStatus.inProgress,
+                onPressed: () =>
+                    setState(() => _filter = ReportStatus.inProgress),
+                key: const Key('filter-progress'),
+              ),
+              _FilterChip(
+                label: 'Resolved',
+                selected: _filter == ReportStatus.resolved,
+                onPressed: () =>
+                    setState(() => _filter = ReportStatus.resolved),
+                key: const Key('filter-resolved'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'All activity',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              if (_viewMode == _ReportViewMode.populated)
+                Text(
+                  '${filtered.length} reports',
+                  style: TextStyle(
+                    color: AdaptivePalette.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              PopupMenuButton<_ReportViewMode>(
+                key: const Key('preview-states-menu'),
+                tooltip: 'Preview loading, empty and error UI states',
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  size: 20,
+                  color: AdaptivePalette.muted,
+                ),
+                onSelected: (mode) => setState(() => _viewMode = mode),
+                itemBuilder: (context) => const [
+                  PopupMenuItem(
+                    value: _ReportViewMode.populated,
+                    child: Text('Show demo reports'),
+                  ),
+                  PopupMenuItem(
+                    value: _ReportViewMode.loading,
+                    child: Text('Preview loading state'),
+                  ),
+                  PopupMenuItem(
+                    value: _ReportViewMode.empty,
+                    child: Text('Preview empty state'),
+                  ),
+                  PopupMenuItem(
+                    value: _ReportViewMode.error,
+                    child: Text('Preview error state'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 13),
+          if (_viewMode == _ReportViewMode.loading)
+            const _PreviewMessageState(
+              title: 'Loading reports',
+              description:
+                  'This shows the future loading state of the live API.',
+              showProgress: true,
+            )
+          else if (_viewMode == _ReportViewMode.empty)
+            const _EmptyResults()
+          else if (_viewMode == _ReportViewMode.error)
+            const _PreviewMessageState(
+              title: 'Unable to load reports',
+              description: 'A network or API error message will appear here after backend integration.',
+              icon: Icons.wifi_off_rounded,
+            )
+          else if (filtered.isEmpty)
+            const _EmptyResults()
+          else
+            ...filtered.map(
+              (report) => Padding(
+                padding: const EdgeInsets.only(bottom: 11),
+                child: _ReportCard(
+                  report: report,
+                  onTap: () => widget.onOpenReport(report),
+                ),
+              ),
+            ),
+          const SizedBox(height: 17),
+          const _DemoNotice(),
+        ],
+      ),
+    );
   }
 }
 
 class _FilterChip extends StatelessWidget {
-  const _FilterChip({super.key, required this.label, required this.selected, required this.onPressed});
+  const _FilterChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onPressed,
+  });
   final String label;
   final bool selected;
   final VoidCallback onPressed;
@@ -424,10 +716,16 @@ class _FilterChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) => onPressed(),
       showCheckmark: false,
-      side: BorderSide(color: selected ? PreviewColours.navy : PreviewColours.border),
-      backgroundColor: Colors.white,
-      selectedColor: PreviewColours.paleBlue,
-      labelStyle: TextStyle(color: selected ? PreviewColours.navy : PreviewColours.muted, fontWeight: FontWeight.w700, fontSize: 12),
+      side: BorderSide(
+        color: selected ? AdaptivePalette.navy : AdaptivePalette.border,
+      ),
+      backgroundColor: AdaptivePalette.surface,
+      selectedColor: AdaptivePalette.paleBlue,
+      labelStyle: TextStyle(
+        color: selected ? AdaptivePalette.navy : AdaptivePalette.muted,
+        fontWeight: FontWeight.w700,
+        fontSize: 12,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 8),
     );
@@ -449,17 +747,34 @@ class _PreviewMessageState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 35),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(21), border: Border.all(color: PreviewColours.border)),
-    child: Column(children: [
-      if (showProgress)
-        const SizedBox(width: 30, height: 30, child: CircularProgressIndicator(strokeWidth: 3))
-      else
-        Icon(icon, size: 33, color: PreviewColours.muted),
-      const SizedBox(height: 14),
-      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-      const SizedBox(height: 7),
-      Text(description, textAlign: TextAlign.center, style: const TextStyle(color: PreviewColours.muted, height: 1.45)),
-    ]),
+    decoration: BoxDecoration(
+      color: AdaptivePalette.surface,
+      borderRadius: BorderRadius.circular(21),
+      border: Border.all(color: AdaptivePalette.border),
+    ),
+    child: Column(
+      children: [
+        if (showProgress)
+          const SizedBox(
+            width: 30,
+            height: 30,
+            child: CircularProgressIndicator(strokeWidth: 3),
+          )
+        else
+          Icon(icon, size: 33, color: AdaptivePalette.muted),
+        const SizedBox(height: 14),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          description,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AdaptivePalette.muted, height: 1.45),
+        ),
+      ],
+    ),
   );
 }
 
@@ -471,14 +786,31 @@ class _EmptyResults extends StatelessWidget {
     return Container(
       key: const Key('empty-reports'),
       padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 18),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(21), border: Border.all(color: PreviewColours.border)),
-      child: const Column(children: [
-        Icon(Icons.search_off_rounded, size: 37, color: PreviewColours.muted),
-        SizedBox(height: 12),
-        Text('No matching reports', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-        SizedBox(height: 7),
-        Text('Try another keyword or status filter.', textAlign: TextAlign.center, style: TextStyle(color: PreviewColours.muted)),
-      ]),
+      decoration: BoxDecoration(
+        color: AdaptivePalette.surface,
+        borderRadius: BorderRadius.circular(21),
+        border: Border.all(color: AdaptivePalette.border),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 37,
+            color: AdaptivePalette.muted,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'No matching reports',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          ),
+          SizedBox(height: 7),
+          Text(
+            'Try another keyword or status filter.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AdaptivePalette.muted),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -491,7 +823,7 @@ class _ReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AdaptivePalette.surface,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         key: Key('report-card-${report.id}'),
@@ -499,30 +831,74 @@ class _ReportCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: PreviewColours.border)),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 49, height: 49,
-              decoration: BoxDecoration(color: PreviewColours.paleBlue, borderRadius: BorderRadius.circular(15)),
-              child: Icon(report.icon, color: PreviewColours.navy, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(report.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: PreviewColours.ink, fontSize: 14, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text(report.location, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: PreviewColours.muted, fontSize: 11.5)),
-              const SizedBox(height: 10),
-              Row(children: [
-                _StatusBadge(report.status),
-                const Spacer(),
-                Text(formatDemoDate(report.createdAt), style: const TextStyle(color: PreviewColours.muted, fontSize: 10.5)),
-              ]),
-            ])),
-            const SizedBox(width: 4),
-            const Icon(Icons.chevron_right_rounded, size: 19, color: PreviewColours.muted),
-          ]),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AdaptivePalette.border),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 49,
+                height: 49,
+                decoration: BoxDecoration(
+                  color: AdaptivePalette.paleBlue,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Icon(report.icon, color: AdaptivePalette.navy, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      report.title,
+                      style: TextStyle(
+                        color: AdaptivePalette.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      report.location,
+                      style: TextStyle(
+                        color: AdaptivePalette.muted,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          _StatusBadge(report.status),
+                          Text(
+                            formatDemoDate(report.createdAt),
+                            style: TextStyle(
+                              color: AdaptivePalette.muted,
+                              fontSize: 10.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 19,
+                color: AdaptivePalette.muted,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -536,14 +912,33 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (background, foreground) = switch (status) {
-      ReportStatus.pending => (PreviewColours.pendingBg, PreviewColours.pending),
-      ReportStatus.inProgress => (PreviewColours.progressBg, PreviewColours.progress),
-      ReportStatus.resolved => (PreviewColours.resolvedBg, PreviewColours.resolved),
+      ReportStatus.pending => (
+        AdaptivePalette.pendingBg,
+        AdaptivePalette.pending,
+      ),
+      ReportStatus.inProgress => (
+        AdaptivePalette.progressBg,
+        AdaptivePalette.progress,
+      ),
+      ReportStatus.resolved => (
+        AdaptivePalette.resolvedBg,
+        AdaptivePalette.resolved,
+      ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(10)),
-      child: Text(status.label, style: TextStyle(color: foreground, fontSize: 10, fontWeight: FontWeight.w800)),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        status.label,
+        style: TextStyle(
+          color: foreground,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }
@@ -556,81 +951,160 @@ class _ReportDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Report Details', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-        actions: const [Padding(padding: EdgeInsets.only(right: 18), child: Center(child: _DemoPill()))],
-      ),
-      body: Center(child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 540),
-        child: ListView(
-          key: const Key('report-details'),
-          padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: PreviewColours.border),
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [
-                  Container(
-                    width: 52, height: 52,
-                    decoration: BoxDecoration(color: PreviewColours.paleBlue, borderRadius: BorderRadius.circular(16)),
-                    child: Icon(report.icon, color: PreviewColours.navy, size: 27),
-                  ),
-                  const Spacer(),
-                  _StatusBadge(report.status),
-                ]),
-                const SizedBox(height: 21),
-                Text(report.title, style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 9),
-                Text(report.id, style: const TextStyle(color: PreviewColours.muted, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .4)),
-                const SizedBox(height: 22),
-                const Divider(color: PreviewColours.border, height: 1),
-                const SizedBox(height: 20),
-                _InfoLine(icon: Icons.category_outlined, title: 'Category', value: report.category),
-                const SizedBox(height: 17),
-                _InfoLine(icon: Icons.place_outlined, title: 'Location', value: report.location),
-                const SizedBox(height: 17),
-                _InfoLine(icon: Icons.calendar_month_outlined, title: 'Date submitted', value: formatDemoDate(report.createdAt)),
-              ]),
-            ),
-            const SizedBox(height: 22),
-            _DetailSection(
-              heading: 'Description',
-              child: Text(report.description, style: const TextStyle(color: PreviewColours.ink, height: 1.55, fontSize: 13.5)),
-            ),
-            const SizedBox(height: 20),
-            _DetailSection(
-              heading: 'Report progress',
-              child: _StatusTimeline(status: report.status),
-            ),
-            const SizedBox(height: 22),
-            const _DemoNotice(),
-          ],
+        title: const Text(
+          'Report Details',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
         ),
-      )),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 18),
+            child: Center(child: _DemoPill()),
+          ),
+        ],
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 540),
+          child: ListView(
+            key: const Key('report-details'),
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: AdaptivePalette.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: AdaptivePalette.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: AdaptivePalette.paleBlue,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            report.icon,
+                            color: AdaptivePalette.navy,
+                            size: 27,
+                          ),
+                        ),
+                        const Spacer(),
+                        _StatusBadge(report.status),
+                      ],
+                    ),
+                    const SizedBox(height: 21),
+                    Text(
+                      report.title,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      report.id,
+                      style: TextStyle(
+                        color: AdaptivePalette.muted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: .4,
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    Divider(color: AdaptivePalette.border, height: 1),
+                    const SizedBox(height: 20),
+                    _InfoLine(
+                      icon: Icons.category_outlined,
+                      title: 'Category',
+                      value: report.category,
+                    ),
+                    const SizedBox(height: 17),
+                    _InfoLine(
+                      icon: Icons.place_outlined,
+                      title: 'Location',
+                      value: report.location,
+                    ),
+                    const SizedBox(height: 17),
+                    _InfoLine(
+                      icon: Icons.calendar_month_outlined,
+                      title: 'Date submitted',
+                      value: formatDemoDate(report.createdAt),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 22),
+              _DetailSection(
+                heading: 'Description',
+                child: Text(
+                  report.description,
+                  style: TextStyle(
+                    color: AdaptivePalette.ink,
+                    height: 1.55,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _DetailSection(
+                heading: 'Report progress',
+                child: _StatusTimeline(status: report.status),
+              ),
+              const SizedBox(height: 22),
+              const _DemoNotice(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 class _InfoLine extends StatelessWidget {
-  const _InfoLine({required this.icon, required this.title, required this.value});
+  const _InfoLine({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
   final IconData icon;
   final String title;
   final String value;
 
   @override
-  Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Icon(icon, size: 19, color: PreviewColours.blue),
-    const SizedBox(width: 13),
-    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(title, style: const TextStyle(fontSize: 11, color: PreviewColours.muted, fontWeight: FontWeight.w600)),
-      const SizedBox(height: 4),
-      Text(value, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: PreviewColours.ink)),
-    ])),
-  ]);
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(icon, size: 19, color: AdaptivePalette.blue),
+      const SizedBox(width: 13),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 11,
+                color: AdaptivePalette.muted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: AdaptivePalette.ink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
 
 class _DetailSection extends StatelessWidget {
@@ -641,12 +1115,19 @@ class _DetailSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(23), border: Border.all(color: PreviewColours.border)),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(heading, style: Theme.of(context).textTheme.titleMedium),
-      const SizedBox(height: 17),
-      child,
-    ]),
+    decoration: BoxDecoration(
+      color: AdaptivePalette.surface,
+      borderRadius: BorderRadius.circular(23),
+      border: Border.all(color: AdaptivePalette.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(heading, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 17),
+        child,
+      ],
+    ),
   );
 }
 
@@ -656,38 +1137,87 @@ class _StatusTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const statuses = [ReportStatus.pending, ReportStatus.inProgress, ReportStatus.resolved];
+    const statuses = [
+      ReportStatus.pending,
+      ReportStatus.inProgress,
+      ReportStatus.resolved,
+    ];
     final activeStep = statuses.indexOf(status);
-    return Column(children: [
-      for (var i = 0; i < statuses.length; i++) ...[
-        Row(children: [
-          Container(
-            width: 24, height: 24,
-            decoration: BoxDecoration(
-              color: i <= activeStep ? PreviewColours.navy : PreviewColours.paleBlue,
-              shape: BoxShape.circle,
+    return Column(
+      children: [
+        for (var i = 0; i < statuses.length; i++) ...[
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: i <= activeStep
+                      ? AdaptivePalette.navy
+                      : AdaptivePalette.paleBlue,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  i < activeStep
+                      ? Icons.check_rounded
+                      : (i == activeStep
+                            ? Icons.circle
+                            : Icons.circle_outlined),
+                  color: i <= activeStep ? Colors.white : AdaptivePalette.muted,
+                  size: i == activeStep ? 10 : 14,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  statuses[i].label,
+                  style: TextStyle(
+                    fontWeight: i == activeStep
+                        ? FontWeight.w800
+                        : FontWeight.w600,
+                    color: i <= activeStep
+                        ? AdaptivePalette.ink
+                        : AdaptivePalette.muted,
+                  ),
+                ),
+              ),
+              if (i == activeStep)
+                Text(
+                  'Current',
+                  style: TextStyle(
+                    color: AdaptivePalette.blue,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
+          ),
+          if (i < statuses.length - 1)
+            Padding(
+              padding: const EdgeInsets.only(left: 11, top: 3, bottom: 3),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 2,
+                  height: 22,
+                  color: i < activeStep
+                      ? AdaptivePalette.navy
+                      : AdaptivePalette.border,
+                ),
+              ),
             ),
-            child: Icon(i < activeStep ? Icons.check_rounded : (i == activeStep ? Icons.circle : Icons.circle_outlined),
-              color: i <= activeStep ? Colors.white : PreviewColours.muted, size: i == activeStep ? 10 : 14),
+        ],
+        const SizedBox(height: 13),
+        Text(
+          'Illustrative status progression only. No real status history is stored in this preview.',
+          style: TextStyle(
+            color: AdaptivePalette.muted,
+            fontSize: 11,
+            height: 1.4,
           ),
-          const SizedBox(width: 13),
-          Expanded(child: Text(statuses[i].label,
-            style: TextStyle(fontWeight: i == activeStep ? FontWeight.w800 : FontWeight.w600,
-              color: i <= activeStep ? PreviewColours.ink : PreviewColours.muted))),
-          if (i == activeStep)
-            const Text('Current', style: TextStyle(color: PreviewColours.blue, fontSize: 11, fontWeight: FontWeight.w700)),
-        ]),
-        if (i < statuses.length - 1)
-          Padding(
-            padding: const EdgeInsets.only(left: 11, top: 3, bottom: 3),
-            child: Align(alignment: Alignment.centerLeft,
-              child: Container(width: 2, height: 22, color: i < activeStep ? PreviewColours.navy : PreviewColours.border)),
-          ),
+        ),
       ],
-      const SizedBox(height: 13),
-      const Text('Illustrative status progression only. No real status history is stored in this preview.',
-        style: TextStyle(color: PreviewColours.muted, fontSize: 11, height: 1.4)),
-    ]);
+    );
   }
 }
 
@@ -696,37 +1226,58 @@ class _ProfileScreen extends StatelessWidget {
   final VoidCallback onAuth;
 
   @override
-  Widget build(BuildContext context) => SafeArea(child: ListView(
-    padding: const EdgeInsets.fromLTRB(22, 30, 22, 25),
-    children: [
-      const Align(alignment: Alignment.centerLeft, child: _DemoPill()),
-      const SizedBox(height: 16),
-      Text('Profile', style: Theme.of(context).textTheme.headlineMedium),
-      const SizedBox(height: 19),
-      Container(
-        padding: const EdgeInsets.all(23),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(23), border: Border.all(color: PreviewColours.border)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const CircleAvatar(radius: 27, backgroundColor: PreviewColours.paleBlue,
-            child: Icon(Icons.person_outline_rounded, size: 29, color: PreviewColours.navy)),
-          const SizedBox(height: 16),
-          const Text('Student account', style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 8),
-          const Text('Profile data and secure sign-in will be provided by Member 1. This screen does not authenticate a user.',
-            style: TextStyle(color: PreviewColours.muted, height: 1.5)),
-          const SizedBox(height: 17),
-          OutlinedButton.icon(
-            key: const Key('profile-placeholder'),
-            onPressed: onAuth,
-            icon: const Icon(Icons.lock_outline_rounded, size: 18),
-            label: const Text('Authentication integration'),
+  Widget build(BuildContext context) => SafeArea(
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(22, 30, 22, 25),
+      children: [
+        const Align(alignment: Alignment.centerLeft, child: _DemoPill()),
+        const SizedBox(height: 16),
+        Text('Profile', style: Theme.of(context).textTheme.headlineMedium),
+        const SizedBox(height: 19),
+        Container(
+          padding: const EdgeInsets.all(23),
+          decoration: BoxDecoration(
+            color: AdaptivePalette.surface,
+            borderRadius: BorderRadius.circular(23),
+            border: Border.all(color: AdaptivePalette.border),
           ),
-        ]),
-      ),
-      const SizedBox(height: 19),
-      const _DemoNotice(),
-    ],
-  ));
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 27,
+                backgroundColor: AdaptivePalette.paleBlue,
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 29,
+                  color: AdaptivePalette.navy,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Student account',
+                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Profile data and secure sign-in will be provided by Member 1. This screen does not authenticate a user.',
+                style: TextStyle(color: AdaptivePalette.muted, height: 1.5),
+              ),
+              const SizedBox(height: 17),
+              OutlinedButton.icon(
+                key: const Key('profile-placeholder'),
+                onPressed: onAuth,
+                icon: const Icon(Icons.lock_outline_rounded, size: 18),
+                label: const Text('Authentication integration'),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 19),
+        const _DemoNotice(),
+      ],
+    ),
+  );
 }
 
 class _DemoPill extends StatelessWidget {
@@ -735,8 +1286,19 @@ class _DemoPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(color: PreviewColours.paleBlue, borderRadius: BorderRadius.circular(11)),
-    child: const Text('DEMO', style: TextStyle(color: PreviewColours.navy, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: .8)),
+    decoration: BoxDecoration(
+      color: AdaptivePalette.paleBlue,
+      borderRadius: BorderRadius.circular(11),
+    ),
+    child: Text(
+      'DEMO',
+      style: TextStyle(
+        color: AdaptivePalette.navy,
+        fontSize: 9,
+        fontWeight: FontWeight.w900,
+        letterSpacing: .8,
+      ),
+    ),
   );
 }
 
@@ -744,10 +1306,21 @@ class _DemoNotice extends StatelessWidget {
   const _DemoNotice();
 
   @override
-  Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    const Icon(Icons.info_outline_rounded, size: 16, color: PreviewColours.muted),
-    const SizedBox(width: 8),
-    const Expanded(child: Text('Demonstration only. Reports, locations, dates and statuses are fictional; Supabase is not connected.',
-      style: TextStyle(color: PreviewColours.muted, fontSize: 11.5, height: 1.5))),
-  ]);
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Icon(Icons.info_outline_rounded, size: 16, color: AdaptivePalette.muted),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          'Demonstration only. Reports, locations, dates and statuses are fictional; Supabase is not connected.',
+          style: TextStyle(
+            color: AdaptivePalette.muted,
+            fontSize: 11.5,
+            height: 1.5,
+          ),
+        ),
+      ),
+    ],
+  );
 }

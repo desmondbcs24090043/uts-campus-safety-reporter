@@ -31,12 +31,16 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   }
 
   void _showIntegrationNotice(String feature) {
-    _showMessage('$feature is not connected in this demo. No photo was captured or uploaded.');
+    _showMessage(
+      '$feature is not connected in this demo. No photo was captured or uploaded.',
+    );
   }
 
   void _selectDemoLocation() {
     setState(() => _sampleLocationSelected = true);
-    _showMessage('Demo location selected. Your real location was not accessed.');
+    _showMessage(
+      'Demo location selected. Your real location was not accessed.',
+    );
   }
 
   void _chooseOnMapPreview() {
@@ -44,26 +48,40 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
       context: context,
       useSafeArea: true,
       showDragHandle: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AdaptivePalette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+      builder: (sheetContext) => SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          10,
+          24,
+          24 + MediaQuery.paddingOf(sheetContext).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.map_outlined, color: PreviewColours.navy, size: 32),
+            Icon(Icons.map_outlined, color: AdaptivePalette.navy, size: 32),
             const SizedBox(height: 16),
-            const Text('Choose a location', style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w800, color: PreviewColours.ink,
-            )),
+            Text(
+              'Choose a location',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AdaptivePalette.ink,
+              ),
+            ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Interactive map selection is not available in this demo. '
               'You can use a sample location to preview the reporting flow.',
-              style: TextStyle(color: PreviewColours.muted, fontSize: 14, height: 1.5),
+              style: TextStyle(
+                color: AdaptivePalette.muted,
+                fontSize: 14,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -73,9 +91,12 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                 _selectDemoLocation();
               },
               style: FilledButton.styleFrom(
-                backgroundColor: PreviewColours.navy,
+                backgroundColor: AdaptivePalette.heroNavy,
+                foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               child: const Text('Use demo location'),
             ),
@@ -86,9 +107,11 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   }
 
   void _finishPreview() {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => const _ReportPreviewCompletePage(),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const _ReportPreviewCompletePage(),
+      ),
+    );
   }
 
   void _review() {
@@ -108,64 +131,96 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
       useSafeArea: true,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AdaptivePalette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (sheetContext) => Padding(
         padding: EdgeInsets.fromLTRB(
-          22, 6, 22, 22 + MediaQuery.viewInsetsOf(sheetContext).bottom,
+          22,
+          6,
+          22,
+          22 +
+              MediaQuery.paddingOf(sheetContext).bottom +
+              MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * .76),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * .76,
+          ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
+                Text(
                   'Review your report',
-                  style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800, color: PreviewColours.ink),
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w800,
+                    color: AdaptivePalette.ink,
+                  ),
                 ),
                 const SizedBox(height: 7),
-                const Text(
+                Text(
                   'Check your details before continuing.',
-                  style: TextStyle(color: PreviewColours.muted, fontSize: 13.5),
+                  style: TextStyle(
+                    color: AdaptivePalette.muted,
+                    fontSize: 13.5,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: PreviewColours.background,
+                    color: AdaptivePalette.background,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: PreviewColours.border),
+                    border: Border.all(color: AdaptivePalette.border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _ReviewLine(label: 'Issue category', value: _category!.label),
-                      const Divider(color: PreviewColours.border, height: 22),
-                      _ReviewLine(label: 'Description', value: _description.text.trim()),
-                      const Divider(color: PreviewColours.border, height: 22),
-                      const _ReviewLine(label: 'Photo', value: 'No photo attached'),
-                      const Divider(color: PreviewColours.border, height: 22),
+                      _ReviewLine(
+                        label: 'Issue category',
+                        value: _category!.label,
+                      ),
+                      Divider(color: AdaptivePalette.border, height: 22),
+                      _ReviewLine(
+                        label: 'Description',
+                        value: _description.text.trim(),
+                      ),
+                      Divider(color: AdaptivePalette.border, height: 22),
+                      const _ReviewLine(
+                        label: 'Photo',
+                        value: 'No photo attached',
+                      ),
+                      Divider(color: AdaptivePalette.border, height: 22),
                       _ReviewLine(
                         label: 'Location',
-                        value: 'Demo location · $_demoLatitude, $_demoLongitude',
+                        value:
+                            'Demo location · $_demoLatitude, $_demoLongitude',
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 14),
-                const Row(
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline_rounded, size: 17, color: PreviewColours.muted),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 17,
+                      color: AdaptivePalette.muted,
+                    ),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Preview only. No report, photo or location will be submitted.',
-                        style: TextStyle(color: PreviewColours.muted, fontSize: 12, height: 1.4),
+                        style: TextStyle(
+                          color: AdaptivePalette.muted,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
@@ -179,7 +234,9 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         onPressed: () => Navigator.of(sheetContext).pop(),
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
                         child: const Text('Edit report'),
                       ),
@@ -194,9 +251,12 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                           _finishPreview();
                         },
                         style: FilledButton.styleFrom(
-                          backgroundColor: PreviewColours.navy,
+                          backgroundColor: AdaptivePalette.heroNavy,
+                          foregroundColor: Colors.white,
                           minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
                         child: const Text('Finish preview'),
                       ),
@@ -214,15 +274,20 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message), behavior: SnackBarBehavior.floating));
+      ..showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: PreviewColours.background,
+      backgroundColor: AdaptivePalette.background,
       appBar: AppBar(
-        title: const Text('New report', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+        title: const Text(
+          'New report',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
         leading: IconButton(
           key: const Key('report-back'),
           tooltip: 'Back to Dashboard',
@@ -246,14 +311,23 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
               key: const Key('report-issue-form'),
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
               children: [
-                const Text(
+                Text(
                   'Report an issue',
-                  style: TextStyle(fontSize: 29, fontWeight: FontWeight.w800, height: 1.1, color: PreviewColours.ink),
+                  style: TextStyle(
+                    fontSize: 29,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    color: AdaptivePalette.ink,
+                  ),
                 ),
                 const SizedBox(height: 9),
-                const Text(
+                Text(
                   'Tell us what happened so campus staff can review it.',
-                  style: TextStyle(fontSize: 14, color: PreviewColours.muted, height: 1.45),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AdaptivePalette.muted,
+                    height: 1.45,
+                  ),
                 ),
                 const SizedBox(height: 19),
                 _InfoNotice(
@@ -263,7 +337,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                 const SizedBox(height: 18),
                 _FormCard(
                   heading: 'Issue category',
-                  supporting: 'Choose the category that best describes the issue.',
+                  supporting:
+                      'Choose the category that best describes the issue.',
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 7,
@@ -274,17 +349,30 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         label: Text(category.label),
                         selected: selected,
                         onSelected: (_) => setState(() => _category = category),
-                        selectedColor: PreviewColours.paleBlue,
-                        backgroundColor: Colors.white,
+                        selectedColor: AdaptivePalette.paleBlue,
+                        backgroundColor: AdaptivePalette.surface,
                         showCheckmark: false,
-                        side: BorderSide(color: selected ? PreviewColours.navy : PreviewColours.border),
+                        side: BorderSide(
+                          color: selected
+                              ? AdaptivePalette.navy
+                              : AdaptivePalette.border,
+                        ),
                         labelStyle: TextStyle(
-                          color: selected ? PreviewColours.navy : PreviewColours.ink,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected
+                              ? AdaptivePalette.navy
+                              : AdaptivePalette.ink,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           fontSize: 12.5,
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -308,8 +396,12 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                     ),
                     validator: (value) {
                       final count = (value ?? '').trim().length;
-                      if (count < 5) return 'Please enter at least 5 characters.';
-                      if (count > 1000) return 'Please keep it under 1000 characters.';
+                      if (count < 5) {
+                        return 'Please enter at least 5 characters.';
+                      }
+                      if (count > 1000) {
+                        return 'Please keep it under 1000 characters.';
+                      }
                       return null;
                     },
                   ),
@@ -322,19 +414,38 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: PreviewColours.background,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: PreviewColours.border),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 22,
+                          horizontal: 12,
                         ),
-                        child: const Column(
+                        decoration: BoxDecoration(
+                          color: AdaptivePalette.background,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AdaptivePalette.border),
+                        ),
+                        child: Column(
                           children: [
-                            Icon(Icons.add_photo_alternate_outlined, color: PreviewColours.blue, size: 26),
+                            Icon(
+                              Icons.add_photo_alternate_outlined,
+                              color: AdaptivePalette.blue,
+                              size: 26,
+                            ),
                             SizedBox(height: 7),
-                            Text('No photo attached', style: TextStyle(color: PreviewColours.ink, fontWeight: FontWeight.w600)),
+                            Text(
+                              'No photo attached',
+                              style: TextStyle(
+                                color: AdaptivePalette.ink,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             SizedBox(height: 4),
-                            Text('JPG, PNG or WEBP · up to 5 MB', style: TextStyle(color: PreviewColours.muted, fontSize: 12)),
+                            Text(
+                              'JPG, PNG or WEBP · up to 5 MB',
+                              style: TextStyle(
+                                color: AdaptivePalette.muted,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -345,7 +456,10 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                             child: OutlinedButton.icon(
                               key: const Key('open-camera-preview'),
                               onPressed: () => _showIntegrationNotice('Camera'),
-                              icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                              icon: const Icon(
+                                Icons.photo_camera_outlined,
+                                size: 18,
+                              ),
                               label: const Text('Camera'),
                             ),
                           ),
@@ -353,7 +467,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                           Expanded(
                             child: OutlinedButton.icon(
                               key: const Key('open-gallery-preview'),
-                              onPressed: () => _showIntegrationNotice('Gallery'),
+                              onPressed: () =>
+                                  _showIntegrationNotice('Gallery'),
                               icon: const Icon(Icons.image_outlined, size: 18),
                               label: const Text('Gallery'),
                             ),
@@ -372,11 +487,14 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                     children: [
                       Container(
                         key: const Key('report-location-panel'),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 22,
+                        ),
                         decoration: BoxDecoration(
-                          color: PreviewColours.background,
+                          color: AdaptivePalette.background,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: PreviewColours.border),
+                          border: Border.all(color: AdaptivePalette.border),
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -386,8 +504,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                                   ? Icons.location_on_rounded
                                   : Icons.location_on_outlined,
                               color: _sampleLocationSelected
-                                  ? PreviewColours.navy
-                                  : PreviewColours.muted,
+                                  ? AdaptivePalette.navy
+                                  : AdaptivePalette.muted,
                               size: 27,
                             ),
                             const SizedBox(height: 8),
@@ -396,8 +514,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                                   ? 'Demo location selected'
                                   : 'No location selected',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: PreviewColours.ink,
+                              style: TextStyle(
+                                color: AdaptivePalette.ink,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 14,
                               ),
@@ -408,7 +526,11 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                                   ? '$_demoLatitude, $_demoLongitude · Not live GPS'
                                   : 'Add a location to help campus staff find the issue.',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: PreviewColours.muted, fontSize: 12.5, height: 1.5),
+                              style: TextStyle(
+                                color: AdaptivePalette.muted,
+                                fontSize: 12.5,
+                                height: 1.5,
+                              ),
                             ),
                           ],
                         ),
@@ -420,11 +542,16 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                             child: OutlinedButton.icon(
                               key: const Key('use-gps-preview'),
                               onPressed: _selectDemoLocation,
-                              icon: const Icon(Icons.my_location_rounded, size: 17),
+                              icon: const Icon(
+                                Icons.my_location_rounded,
+                                size: 17,
+                              ),
                               label: const Text('Use GPS'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(46),
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                               ),
                             ),
                           ),
@@ -437,26 +564,35 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                               label: const Text('Choose on map'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(46),
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 9),
-                      const Text(
+                      Text(
                         'Demo only · Both options use sample coordinates, not your real location.',
-                        style: TextStyle(fontSize: 11.5, height: 1.4, color: PreviewColours.muted),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          height: 1.4,
+                          color: AdaptivePalette.muted,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Center(
+                Center(
                   child: Text(
                     'Preview only · No data will be saved or uploaded',
-                    style: TextStyle(color: PreviewColours.muted, fontSize: 12),
+                    style: TextStyle(
+                      color: AdaptivePalette.muted,
+                      fontSize: 12,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -466,9 +602,9 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: PreviewColours.border)),
+        decoration: BoxDecoration(
+          color: AdaptivePalette.surface,
+          border: Border(top: BorderSide(color: AdaptivePalette.border)),
         ),
         child: SafeArea(
           top: false,
@@ -482,10 +618,16 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                   key: const Key('report-preview-review'),
                   onPressed: _review,
                   style: FilledButton.styleFrom(
-                    backgroundColor: PreviewColours.navy,
+                    backgroundColor: AdaptivePalette.heroNavy,
+                    foregroundColor: Colors.white,
                     minimumSize: const Size.fromHeight(52),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                    textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   child: const Text('Review report'),
                 ),
@@ -499,7 +641,11 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
 }
 
 class _FormCard extends StatelessWidget {
-  const _FormCard({required this.heading, required this.supporting, required this.child});
+  const _FormCard({
+    required this.heading,
+    required this.supporting,
+    required this.child,
+  });
   final String heading;
   final String supporting;
   final Widget child;
@@ -508,16 +654,30 @@ class _FormCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(19),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AdaptivePalette.surface,
       borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: PreviewColours.border),
+      border: Border.all(color: AdaptivePalette.border),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(heading, style: const TextStyle(color: PreviewColours.ink, fontSize: 16, fontWeight: FontWeight.w800)),
+        Text(
+          heading,
+          style: TextStyle(
+            color: AdaptivePalette.ink,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: 5),
-        Text(supporting, style: const TextStyle(color: PreviewColours.muted, fontSize: 12.5, height: 1.45)),
+        Text(
+          supporting,
+          style: TextStyle(
+            color: AdaptivePalette.muted,
+            fontSize: 12.5,
+            height: 1.45,
+          ),
+        ),
         const SizedBox(height: 15),
         child,
       ],
@@ -534,14 +694,23 @@ class _InfoNotice extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: PreviewColours.paleBlue,
+      color: AdaptivePalette.paleBlue,
       borderRadius: BorderRadius.circular(17),
     ),
     child: Row(
       children: [
-        Icon(icon, color: PreviewColours.navy, size: 19),
+        Icon(icon, color: AdaptivePalette.navy, size: 19),
         const SizedBox(width: 11),
-        Expanded(child: Text(message, style: const TextStyle(color: PreviewColours.navy, fontSize: 12.5, height: 1.4))),
+        Expanded(
+          child: Text(
+            message,
+            style: TextStyle(
+              color: AdaptivePalette.navy,
+              fontSize: 12.5,
+              height: 1.4,
+            ),
+          ),
+        ),
       ],
     ),
   );
@@ -553,8 +722,19 @@ class _DemoBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-    decoration: BoxDecoration(color: PreviewColours.paleBlue, borderRadius: BorderRadius.circular(50)),
-    child: const Text('DEMO', style: TextStyle(color: PreviewColours.navy, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: .7)),
+    decoration: BoxDecoration(
+      color: AdaptivePalette.paleBlue,
+      borderRadius: BorderRadius.circular(50),
+    ),
+    child: Text(
+      'DEMO',
+      style: TextStyle(
+        color: AdaptivePalette.navy,
+        fontSize: 10,
+        fontWeight: FontWeight.w800,
+        letterSpacing: .7,
+      ),
+    ),
   );
 }
 
@@ -563,75 +743,94 @@ class _ReportPreviewCompletePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: PreviewColours.background,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text('Preview complete', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-          actions: const [
-            Padding(
-              padding: EdgeInsets.only(right: 19),
-              child: Center(child: _DemoBadge()),
-            ),
-          ],
+    backgroundColor: AdaptivePalette.background,
+    appBar: AppBar(
+      automaticallyImplyLeading: false,
+      title: const Text(
+        'Preview complete',
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+      ),
+      actions: const [
+        Padding(
+          padding: EdgeInsets.only(right: 19),
+          child: Center(child: _DemoBadge()),
         ),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 470),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      decoration: const BoxDecoration(
-                        color: PreviewColours.paleBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.check_circle_outline_rounded,
-                          size: 44, color: PreviewColours.navy),
-                    ),
-                    const SizedBox(height: 22),
-                    const Text(
-                      'UI preview complete',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800, color: PreviewColours.ink),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'You have reached the end of the reporting preview.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: PreviewColours.muted, fontSize: 14, height: 1.5),
-                    ),
-                    const SizedBox(height: 20),
-                    const _InfoNotice(
-                      icon: Icons.info_outline_rounded,
-                      message: 'No report was submitted. No photo or location was sent or saved.',
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        key: const Key('report-preview-home'),
-                        onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
-                        icon: const Icon(Icons.home_outlined, size: 19),
-                        label: const Text('Back to Home'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: PreviewColours.navy,
-                          minimumSize: const Size.fromHeight(52),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
-                        ),
-                      ),
-                    ),
-                  ],
+      ],
+    ),
+    body: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 470),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 82,
+                  height: 82,
+                  decoration: BoxDecoration(
+                    color: AdaptivePalette.paleBlue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 44,
+                    color: AdaptivePalette.navy,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 22),
+                Text(
+                  'UI preview complete',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w800,
+                    color: AdaptivePalette.ink,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'You have reached the end of the reporting preview.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AdaptivePalette.muted,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const _InfoNotice(
+                  icon: Icons.info_outline_rounded,
+                  message: 'No report was submitted. No photo or location was sent or saved.',
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const Key('report-preview-home'),
+                    onPressed: () =>
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst),
+                    icon: const Icon(Icons.home_outlined, size: 19),
+                    label: const Text('Back to Home'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AdaptivePalette.heroNavy,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(17),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _ReviewLine extends StatelessWidget {
@@ -645,9 +844,19 @@ class _ReviewLine extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: PreviewColours.muted)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: AdaptivePalette.muted),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, color: PreviewColours.ink, fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            color: AdaptivePalette.ink,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     ),
   );

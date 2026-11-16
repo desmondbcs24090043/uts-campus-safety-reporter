@@ -44,9 +44,8 @@ class _RegisterPageState extends State<RegisterPage> {
             Navigator.of(context).pop();
           }
           if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -54,20 +53,20 @@ class _RegisterPageState extends State<RegisterPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Create your account',
                 style: TextStyle(
-                  color: PreviewColours.ink,
+                  color: AdaptivePalette.ink,
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 'Join Campus Safety to report and track issues.',
                 style: TextStyle(
-                  color: PreviewColours.muted,
+                  color: AdaptivePalette.muted,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -87,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.email],
-                        style: const TextStyle(color: PreviewColours.ink),
+                        style: TextStyle(color: AdaptivePalette.ink),
                         decoration: authInputDecoration(
                           hint: 'Enter your email address',
                         ),
@@ -107,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           if (!loading) _submit();
                         },
                         autofillHints: const [AutofillHints.newPassword],
-                        style: const TextStyle(color: PreviewColours.ink),
+                        style: TextStyle(color: AdaptivePalette.ink),
                         decoration: authInputDecoration(
                           hint: 'At least 6 characters',
                           suffixIcon: IconButton(
@@ -121,7 +120,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               _obscurePassword
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
-                              color: PreviewColours.muted,
+                              color: AdaptivePalette.muted,
                               size: 21,
                             ),
                           ),
@@ -148,18 +147,18 @@ class _RegisterPageState extends State<RegisterPage> {
                   alignment: WrapAlignment.center,
                   spacing: 3,
                   children: [
-                    const Text(
+                    Text(
                       'Already have an account?',
-                      style: TextStyle(color: PreviewColours.muted),
+                      style: TextStyle(color: AdaptivePalette.muted),
                     ),
                     TextButton(
                       onPressed: loading
                           ? null
                           : () => Navigator.of(context).pop(),
-                      child: const Text(
+                      child: Text(
                         'Sign in',
                         style: TextStyle(
-                          color: PreviewColours.navy,
+                          color: AdaptivePalette.navy,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

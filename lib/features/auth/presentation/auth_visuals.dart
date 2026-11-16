@@ -19,16 +19,18 @@ class AuthPageFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: PreviewColours.background,
+      backgroundColor: AdaptivePalette.background,
       appBar: showBack
           ? AppBar(
-              backgroundColor: PreviewColours.background,
+              backgroundColor: AdaptivePalette.background,
               elevation: 0,
               leading: IconButton(
                 tooltip: 'Back to sign in',
                 onPressed: () => Navigator.of(context).maybePop(),
-                icon: const Icon(Icons.arrow_back_rounded,
-                    color: PreviewColours.ink),
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  color: AdaptivePalette.ink,
+                ),
               ),
             )
           : null,
@@ -47,7 +49,7 @@ class AuthPageFrame extends StatelessWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: PreviewColours.navy,
+                          color: AdaptivePalette.heroNavy,
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
@@ -57,14 +59,14 @@ class AuthPageFrame extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'CAMPUS SAFETY',
                               style: TextStyle(
-                                color: PreviewColours.muted,
+                                color: AdaptivePalette.muted,
                                 fontSize: 10,
                                 letterSpacing: 1.6,
                                 fontWeight: FontWeight.w800,
@@ -74,7 +76,7 @@ class AuthPageFrame extends StatelessWidget {
                             Text(
                               'Reporter',
                               style: TextStyle(
-                                color: PreviewColours.ink,
+                                color: AdaptivePalette.ink,
                                 fontSize: 19,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -89,14 +91,14 @@ class AuthPageFrame extends StatelessWidget {
                             vertical: 7,
                           ),
                           decoration: BoxDecoration(
-                            color: PreviewColours.paleBlue,
+                            color: AdaptivePalette.paleBlue,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text(
+                          child: Text(
                             'DEMO',
                             style: TextStyle(
                               fontSize: 10,
-                              color: PreviewColours.navy,
+                              color: AdaptivePalette.navy,
                               fontWeight: FontWeight.w700,
                               letterSpacing: .4,
                             ),
@@ -108,14 +110,14 @@ class AuthPageFrame extends StatelessWidget {
                   child,
                   if (demoMode) ...[
                     const SizedBox(height: 25),
-                    const Center(
+                    Center(
                       child: Text(
                         'Demo preview only. Sign-in is not connected to Supabase.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
                           height: 1.5,
-                          color: PreviewColours.muted,
+                          color: AdaptivePalette.muted,
                         ),
                       ),
                     ),
@@ -141,12 +143,12 @@ class AuthFormPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: PreviewColours.border),
+        color: AdaptivePalette.surface,
+        border: Border.all(color: AdaptivePalette.border),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: PreviewColours.deepNavy.withValues(alpha: .035),
+            color: AdaptivePalette.deepNavy.withValues(alpha: .035),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -165,8 +167,8 @@ class AuthFieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: const TextStyle(
-        color: PreviewColours.ink,
+      style: TextStyle(
+        color: AdaptivePalette.ink,
         fontSize: 13,
         fontWeight: FontWeight.w700,
       ),
@@ -178,20 +180,20 @@ InputDecoration authInputDecoration({
   required String hint,
   Widget? suffixIcon,
 }) {
-  const normal = OutlineInputBorder(
+  final normal = OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(15)),
-    borderSide: BorderSide(color: PreviewColours.border),
+    borderSide: BorderSide(color: AdaptivePalette.border),
   );
-  const focused = OutlineInputBorder(
+  final focused = OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(15)),
-    borderSide: BorderSide(color: PreviewColours.blue, width: 1.6),
+    borderSide: BorderSide(color: AdaptivePalette.blue, width: 1.6),
   );
 
   return InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: PreviewColours.muted, fontSize: 14),
+    hintStyle: TextStyle(color: AdaptivePalette.muted, fontSize: 14),
     filled: true,
-    fillColor: Colors.white,
+    fillColor: AdaptivePalette.surface,
     border: normal,
     enabledBorder: normal,
     focusedBorder: focused,
@@ -223,9 +225,11 @@ class AuthPrimaryButton extends StatelessWidget {
         key: buttonKey,
         onPressed: loading ? null : onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: PreviewColours.navy,
+          backgroundColor: AdaptivePalette.heroNavy,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: PreviewColours.navy.withValues(alpha: .6),
+          disabledBackgroundColor: AdaptivePalette.heroNavy.withValues(
+            alpha: .6,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),

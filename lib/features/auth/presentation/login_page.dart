@@ -42,14 +42,12 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.message)));
           }
           if (state is AuthUnauthenticated && state.message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message!)),
-            );
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.message!)));
           }
         },
         builder: (context, state) {
@@ -57,20 +55,20 @@ class _LoginPageState extends State<LoginPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Welcome back',
                 style: TextStyle(
-                  color: PreviewColours.ink,
+                  color: AdaptivePalette.ink,
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 'Sign in to report and track campus issues.',
                 style: TextStyle(
-                  color: PreviewColours.muted,
+                  color: AdaptivePalette.muted,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -90,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         autofillHints: const [AutofillHints.email],
-                        style: const TextStyle(color: PreviewColours.ink),
+                        style: TextStyle(color: AdaptivePalette.ink),
                         decoration: authInputDecoration(
                           hint: 'Enter your email address',
                         ),
@@ -110,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (!loading) _submit();
                         },
                         autofillHints: const [AutofillHints.password],
-                        style: const TextStyle(color: PreviewColours.ink),
+                        style: TextStyle(color: AdaptivePalette.ink),
                         decoration: authInputDecoration(
                           hint: 'Enter your password',
                           suffixIcon: IconButton(
@@ -124,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                               _obscurePassword
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
-                              color: PreviewColours.muted,
+                              color: AdaptivePalette.muted,
                               size: 21,
                             ),
                           ),
@@ -151,25 +149,24 @@ class _LoginPageState extends State<LoginPage> {
                   alignment: WrapAlignment.center,
                   spacing: 3,
                   children: [
-                    const Text(
+                    Text(
                       'New here?',
-                      style: TextStyle(color: PreviewColours.muted),
+                      style: TextStyle(color: AdaptivePalette.muted),
                     ),
                     TextButton(
                       key: const Key('auth-open-register'),
                       onPressed: loading
                           ? null
                           : () => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => RegisterPage(
-                                    demoMode: widget.demoMode,
-                                  ),
-                                ),
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    RegisterPage(demoMode: widget.demoMode),
                               ),
-                      child: const Text(
+                            ),
+                      child: Text(
                         'Create an account',
                         style: TextStyle(
-                          color: PreviewColours.navy,
+                          color: AdaptivePalette.navy,
                           fontWeight: FontWeight.w700,
                         ),
                       ),

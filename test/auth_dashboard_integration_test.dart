@@ -7,7 +7,9 @@ import 'package:team_repo/features/auth/presentation/auth_cubit.dart';
 import 'package:team_repo/preview_auth_dashboard_main.dart';
 
 void main() {
-  testWidgets('Student can sign in, open Dashboard and sign out', (tester) async {
+  testWidgets('Student can sign in, open Dashboard and sign out', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       BlocProvider(
         create: (_) => AuthCubit(MockAuthRepository()),
@@ -22,10 +24,7 @@ void main() {
       find.byKey(const Key('auth-email')),
       'student@test.com',
     );
-    await tester.enterText(
-      find.byKey(const Key('auth-password')),
-      'Test1234!',
-    );
+    await tester.enterText(find.byKey(const Key('auth-password')), 'Test1234!');
 
     await tester.ensureVisible(find.byKey(const Key('auth-sign-in')));
     await tester.tap(find.byKey(const Key('auth-sign-in')));
@@ -36,6 +35,14 @@ void main() {
     await tester.tap(find.byKey(const Key('nav-profile')));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('profile-sign-out')),
+      150,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('profile-v2-list')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     expect(find.byKey(const Key('profile-sign-out')), findsOneWidget);
     await tester.tap(find.byKey(const Key('profile-sign-out')));
     await tester.pumpAndSettle();
@@ -44,7 +51,9 @@ void main() {
     expect(find.text('Hello, Student 👋'), findsNothing);
   });
 
-  testWidgets('Registration screen opens with matching branding', (tester) async {
+  testWidgets('Registration screen opens with matching branding', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       BlocProvider(
         create: (_) => AuthCubit(MockAuthRepository()),

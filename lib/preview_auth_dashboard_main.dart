@@ -10,9 +10,12 @@ import 'features/reports/data/demo_reports_repository.dart';
 import 'features/reports/presentation/reports_bloc.dart';
 import 'features/reports/presentation/reports_event.dart';
 import 'preview_integrated/preview_app_integrated.dart';
+import 'preview/preview_theme.dart';
+import 'preview/app_appearance.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppAppearance.restore();
 
   runApp(
     BlocProvider(
@@ -32,9 +35,9 @@ class AuthDashboardPreview extends StatelessWidget {
         if (state is AuthAuthenticated) {
           if (state.role == 'student') {
             return BlocProvider(
-              create: (_) => ReportsBloc(
-                DemoReportsRepository(),
-              )..add(const ReportsRequested()),
+              create: (_) =>
+                  ReportsBloc(DemoReportsRepository())
+                    ..add(const ReportsRequested()),
               child: CampusSafetyIntegratedPreviewApp(
                 onSignOut: () => context.read<AuthCubit>().signOut(),
               ),
@@ -42,6 +45,9 @@ class AuthDashboardPreview extends StatelessWidget {
           }
 
           return MaterialApp(
+            theme: buildPreviewTheme(dark: false),
+            darkTheme: buildPreviewTheme(dark: true),
+            themeMode: AppAppearance.isDark ? ThemeMode.dark : ThemeMode.light,
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               body: Center(
@@ -61,7 +67,10 @@ class AuthDashboardPreview extends StatelessWidget {
           );
         }
 
-        return const MaterialApp(
+        return MaterialApp(
+          theme: buildPreviewTheme(dark: false),
+          darkTheme: buildPreviewTheme(dark: true),
+          themeMode: AppAppearance.isDark ? ThemeMode.dark : ThemeMode.light,
           debugShowCheckedModeBanner: false,
           title: 'Campus Safety Reporter',
           home: LoginPage(demoMode: true),
