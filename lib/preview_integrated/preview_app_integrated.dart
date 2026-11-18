@@ -1074,6 +1074,11 @@ class _ReportDetailsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _DetailSection(
+                heading: 'Attached Photo',
+                child: _AttachedReportPhoto(reportId: report.id),
+              ),
+              const SizedBox(height: 20),
+              _DetailSection(
                 heading: 'Report progress',
                 child: _StatusTimeline(status: report.status),
               ),
@@ -1083,6 +1088,115 @@ class _ReportDetailsScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AttachedReportPhoto extends StatelessWidget {
+  const _AttachedReportPhoto({required this.reportId});
+
+  final String reportId;
+
+  // This photo belongs only to the fictional corridor report.
+  static const _demoPhoto = 'assets/demo/corridor-light.jpg';
+
+  void _openPhoto(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: AdaptivePalette.surface,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 6, 6, 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Demo photo',
+                        style: Theme.of(dialogContext).textTheme.titleMedium,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Close photo',
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: InteractiveViewer(
+                  key: const Key('report-photo-viewer'),
+                  child: AspectRatio(
+                    aspectRatio: 3 / 2,
+                    child: Image.asset(
+                      _demoPhoto,
+                      fit: BoxFit.contain,
+                      semanticLabel: 'Demo photo of a corridor light',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (reportId != 'CSR-2026-001') {
+      return Row(
+        children: [
+          Icon(Icons.image_outlined, size: 19, color: AdaptivePalette.muted),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'No photo attached',
+              style: TextStyle(color: AdaptivePalette.muted, fontSize: 13.5),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          label: 'Enlarge demo photo',
+          child: Material(
+            color: AdaptivePalette.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(color: AdaptivePalette.border),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              key: const Key('report-photo-thumbnail'),
+              onTap: () => _openPhoto(context),
+              child: Ink.image(
+                image: const AssetImage(_demoPhoto),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                height: 148,
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 9),
+        Text(
+          'Demo photo · Tap to enlarge',
+          style: TextStyle(color: AdaptivePalette.muted, fontSize: 12),
+        ),
+      ],
     );
   }
 }

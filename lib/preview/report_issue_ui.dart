@@ -18,7 +18,11 @@ class ReportIssuePreviewPage extends StatefulWidget {
 class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   final _formKey = GlobalKey<FormState>();
   final _description = TextEditingController();
+  final _specificLocation = TextEditingController();
   ReportCategory? _category;
+  String? _campusArea;
+
+  static const _demoCampusAreas = ['Demo area A', 'Demo area B', 'Demo area C'];
   bool _sampleLocationSelected = false;
 
   static const _demoLatitude = 2.3150;
@@ -27,6 +31,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   @override
   void dispose() {
     _description.dispose();
+    _specificLocation.dispose();
     super.dispose();
   }
 
@@ -114,16 +119,33 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
     );
   }
 
+  String? _descriptionError(String? value) {
+    final count = (value ?? '').trim().length;
+    if (count < 5) {
+      return 'Please enter at least 5 characters.';
+    }
+    if (count > 1000) {
+      return 'Please keep it under 1000 characters.';
+    }
+    return null;
+  }
+
   void _review() {
     if (_category == null) {
       _showMessage('Choose a category first.');
       return;
     }
     if (!_formKey.currentState!.validate()) return;
-    if (!_sampleLocationSelected) {
-      _showMessage('Choose a location before reviewing your report.');
+    final descriptionError = _descriptionError(_description.text);
+    if (descriptionError != null) {
+      _showMessage(descriptionError);
       return;
     }
+    if (_campusArea == null) {
+      _showMessage('Choose a campus area before reviewing your report.');
+      return;
+    }
+    final specificLocation = _specificLocation.text.trim();
 
     FocusScope.of(context).unfocus();
     showModalBottomSheet<void>(
@@ -195,11 +217,21 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         value: 'No photo attached',
                       ),
                       Divider(color: AdaptivePalette.border, height: 22),
-                      _ReviewLine(
-                        label: 'Location',
-                        value:
-                            'Demo location · $_demoLatitude, $_demoLongitude',
-                      ),
+                      _ReviewLine(label: 'Campus Area', value: _campusArea!),
+                      if (specificLocation.isNotEmpty) ...[
+                        Divider(color: AdaptivePalette.border, height: 22),
+                        _ReviewLine(
+                          label: 'Specific Location',
+                          value: specificLocation,
+                        ),
+                      ],
+                      if (_sampleLocationSelected) ...[
+                        Divider(color: AdaptivePalette.border, height: 22),
+                        const _ReviewLine(
+                          label: 'Demo coordinates',
+                          value: '$_demoLatitude, $_demoLongitude',
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -394,16 +426,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                       hintMaxLines: 3,
                       alignLabelWithHint: true,
                     ),
-                    validator: (value) {
-                      final count = (value ?? '').trim().length;
-                      if (count < 5) {
-                        return 'Please enter at least 5 characters.';
-                      }
-                      if (count > 1000) {
-                        return 'Please keep it under 1000 characters.';
-                      }
-                      return null;
-                    },
+                    validator: _descriptionError,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -485,57 +508,36 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        key: const Key('report-location-panel'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 22,
+                      DropdownButtonFormField<String>(
+                        key: const Key('report-campus-area'),
+                        initialValue: _campusArea,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Campus Area (required)',
+                          helperText: 'Demo options only.',
+                          border: OutlineInputBorder(),
                         ),
-                        decoration: BoxDecoration(
-                          color: AdaptivePalette.background,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AdaptivePalette.border),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _sampleLocationSelected
-                                  ? Icons.location_on_rounded
-                                  : Icons.location_on_outlined,
-                              color: _sampleLocationSelected
-                                  ? AdaptivePalette.navy
-                                  : AdaptivePalette.muted,
-                              size: 27,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _sampleLocationSelected
-                                  ? 'Demo location selected'
-                                  : 'No location selected',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AdaptivePalette.ink,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              _sampleLocationSelected
-                                  ? '$_demoLatitude, $_demoLongitude · Not live GPS'
-                                  : 'Add a location to help campus staff find the issue.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AdaptivePalette.muted,
-                                fontSize: 12.5,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
+                        items: [
+                          for (final area in _demoCampusAreas)
+                            DropdownMenuItem(value: area, child: Text(area)),
+                        ],
+                        onChanged: (value) => _campusArea = value,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        key: const Key('report-specific-location'),
+                        controller: _specificLocation,
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLines: 2,
+                        minLines: 1,
+                        decoration: const InputDecoration(
+                          labelText: 'Specific Location (optional)',
+                          hintText: 'Room, floor or nearby landmark',
+                          hintMaxLines: 2,
+                          border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
@@ -574,7 +576,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                       ),
                       const SizedBox(height: 9),
                       Text(
-                        'Demo only · Both options use sample coordinates, not your real location.',
+                        'Optional demo aids · Both use sample coordinates.',
                         style: TextStyle(
                           fontSize: 11.5,
                           height: 1.4,
@@ -582,6 +584,27 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
+                      if (_sampleLocationSelected) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          'Demo location selected',
+                          key: const Key('report-location-panel'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AdaptivePalette.ink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          '$_demoLatitude, $_demoLongitude · Not live GPS',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AdaptivePalette.muted,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

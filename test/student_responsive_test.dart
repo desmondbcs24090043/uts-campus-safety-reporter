@@ -201,8 +201,27 @@ void main() {
           await revealInList('my-reports-list', report);
           await tap(report);
           await page('05-report-details', find.text('Report Details'));
+          final noPhoto = find.text('No photo attached');
+          await revealInList('report-details', noPhoto);
+          expect(noPhoto.hitTestable(), findsOneWidget);
           await back();
           await tap(keyed('nav-home'));
+          final sample = keyed('report-card-CSR-2026-001');
+          await revealInList('dashboard-list', sample);
+          await tap(sample);
+          final thumbnail = keyed('report-photo-thumbnail');
+          await revealInList('report-details', thumbnail, alignment: .76);
+          final photoContext = tester.element(thumbnail);
+          await tester.runAsync(() => precacheImage(
+            const AssetImage('assets/demo/corridor-light.jpg'),
+            photoContext,
+          ));
+          await tester.pumpAndSettle();
+          await page('05a-attached-photo', thumbnail);
+          await tap(thumbnail);
+          await page('05b-photo-viewer', keyed('report-photo-viewer'));
+          await tap(find.byTooltip('Close photo'));
+          await back();
           final reportIssue = keyed('report-issue-cta');
           await revealInList('dashboard-list', reportIssue, delta: -140);
           await tap(reportIssue);
@@ -215,6 +234,20 @@ void main() {
           );
           FocusManager.instance.primaryFocus?.unfocus();
           await tester.pumpAndSettle();
+          await formControl('report-campus-area');
+          await tap(find.text('Demo area A').last);
+          await revealInList(
+            'report-issue-form',
+            keyed('report-specific-location'),
+            alignment: .46,
+          );
+          await tester.enterText(
+            keyed('report-specific-location'),
+            'Beside the stairwell',
+          );
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+          await page('06d-location-fields', keyed('report-specific-location'));
           await formControl('choose-map-preview');
           await page('06a-location-sheet', find.text('Choose a location'));
           await sheetButton('confirm-demo-map-pin');
@@ -222,6 +255,8 @@ void main() {
           await tester.pumpAndSettle();
           await tap(keyed('report-preview-review'));
           await page('06b-review-sheet', find.text('Review your report'));
+          expect(find.text('Beside the stairwell'), findsWidgets);
+          expect(find.text('Demo coordinates'), findsOneWidget);
           await sheetButton('finish-demo-report');
           await page('06c-report-complete', find.text('UI preview complete'));
           await tap(keyed('report-preview-home'));

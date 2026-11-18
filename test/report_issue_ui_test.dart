@@ -46,6 +46,10 @@ void main() {
     expect(find.text('Use GPS'), findsOneWidget);
     expect(find.text('Choose on map'), findsOneWidget);
     expect(find.text('ILLUSTRATIVE MAP'), findsNothing);
+    await tester.tap(find.byKey(const Key('use-gps-preview')));
+    await tester.pumpAndSettle();
+    await scrollFormTo(tester, 'report-location-panel');
+    expect(find.text('Demo location selected'), findsOneWidget);
   });
 
   testWidgets('Report can be edited and preview completed', (tester) async {
@@ -73,18 +77,25 @@ void main() {
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
 
-    await scrollFormTo(tester, 'use-gps-preview');
-    await tester.tap(find.byKey(const Key('use-gps-preview')));
+    const reviewKey = Key('report-preview-review');
+    await tester.tap(find.byKey(reviewKey));
     await tester.pumpAndSettle();
-    expect(find.text('Demo location selected'), findsOneWidget,
-        reason: 'The sample location was not selected.');
-
-    // The GPS demo shows a snackbar. Let it fully disappear before tapping
-    // the pinned bottom button, so the test targets the intended control.
+    expect(
+      find.text('Choose a campus area before reviewing your report.'),
+      findsOneWidget,
+    );
+    expect(find.text('Review your report'), findsNothing);
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    const reviewKey = Key('report-preview-review');
+    await scrollFormTo(tester, 'report-campus-area');
+    await tester.tap(find.byKey(const Key('report-campus-area')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Demo area B').last);
+    await tester.pumpAndSettle();
+
+    // Campus Area alone is sufficient. Leave both the optional field and aids unused.
+
     await tester.tap(find.byKey(reviewKey));
     await tester.pumpAndSettle();
 
@@ -103,6 +114,8 @@ void main() {
     expect(find.text('Review your report'), findsOneWidget,
         reason: 'Review dialog not shown after selecting category, valid text, and sample location.');
     expect(find.text('No photo attached'), findsWidgets);
+    expect(find.text('Campus Area'), findsOneWidget);
+    expect(find.text('Demo coordinates'), findsNothing);
     expect(find.byKey(const Key('edit-report-preview')), findsOneWidget);
     expect(find.byKey(const Key('finish-demo-report')), findsOneWidget);
 
