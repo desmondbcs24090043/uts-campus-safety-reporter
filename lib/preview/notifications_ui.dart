@@ -115,15 +115,6 @@ class _NotificationsV2PageState extends State<NotificationsV2Page> {
                   ),
                   const SizedBox(height: 15),
                 ],
-                Text(
-                  'Stay updated on your reports.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.45,
-                    color: AdaptivePalette.muted,
-                  ),
-                ),
-                const SizedBox(height: 25),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
