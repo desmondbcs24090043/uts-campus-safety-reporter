@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/models/report_category.dart';
+import 'demo_report_photos.dart';
 import 'preview_theme.dart';
 
 /// Member 2 UI-only hand-off for Member 3's incident reporting feature.
@@ -19,6 +20,9 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   final _formKey = GlobalKey<FormState>();
   final _description = TextEditingController();
   final _specificLocation = TextEditingController();
+  final _photos = <DemoReportPhoto>[];
+  bool get _photoLimitReached =>
+      _photos.length == DemoReportPhoto.samples.length;
   ReportCategory? _category;
   String? _campusArea;
 
@@ -35,10 +39,49 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
     super.dispose();
   }
 
-  void _showIntegrationNotice(String feature) {
-    _showMessage(
-      '$feature is not connected in this demo. No photo was captured or uploaded.',
+  Future<void> _chooseDemoPhoto(String source) async {
+    final photo = await showModalBottomSheet<DemoReportPhoto>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: AdaptivePalette.surface,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Demo $source',
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose a sample photo. No device photos are accessed.',
+              ),
+              const SizedBox(height: 12),
+              for (final sample in DemoReportPhoto.samples)
+                if (!_photos.contains(sample))
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: SizedBox(
+                      width: 48,
+                      height: 40,
+                      child: sample.image(),
+                    ),
+                    title: Text(sample.label),
+                    onTap: () => Navigator.of(sheetContext).pop(sample),
+                  ),
+            ],
+          ),
+        ),
+      ),
     );
+    if (mounted && photo != null && !_photoLimitReached) {
+      setState(() => _photos.add(photo));
+    }
   }
 
   void _selectDemoLocation() {
@@ -212,10 +255,18 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         value: _description.text.trim(),
                       ),
                       Divider(color: AdaptivePalette.border, height: 22),
-                      const _ReviewLine(
+                      _ReviewLine(
                         label: 'Photo',
-                        value: 'No photo attached',
+                        value: switch (_photos.length) {
+                          0 => 'No photo attached',
+                          1 => '1 demo photo',
+                          final count => '$count demo photos',
+                        },
                       ),
+                      if (_photos.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        DemoPhotoStrip(photos: _photos),
+                      ],
                       Divider(color: AdaptivePalette.border, height: 22),
                       _ReviewLine(label: 'Campus Area', value: _campusArea!),
                       if (specificLocation.isNotEmpty) ...[
@@ -432,53 +483,85 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                 const SizedBox(height: 14),
                 _FormCard(
                   heading: 'Photo',
-                  supporting: 'Add a photo to help staff understand the issue (optional).',
+                  supporting: 'Add up to 3 photos to help staff understand the issue (optional).',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 22,
-                          horizontal: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AdaptivePalette.background,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AdaptivePalette.border),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.add_photo_alternate_outlined,
-                              color: AdaptivePalette.blue,
-                              size: 26,
-                            ),
-                            SizedBox(height: 7),
-                            Text(
-                              'No photo attached',
-                              style: TextStyle(
-                                color: AdaptivePalette.ink,
-                                fontWeight: FontWeight.w600,
+                      if (_photos.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 22,
+                            horizontal: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AdaptivePalette.background,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AdaptivePalette.border),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.add_photo_alternate_outlined,
+                                color: AdaptivePalette.blue,
+                                size: 26,
                               ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'JPG, PNG or WEBP · up to 5 MB',
-                              style: TextStyle(
-                                color: AdaptivePalette.muted,
-                                fontSize: 12,
+                              SizedBox(height: 7),
+                              Text(
+                                'No photo attached',
+                                style: TextStyle(
+                                  color: AdaptivePalette.ink,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 4),
+                              Text(
+                                'JPG, PNG or WEBP · up to 5 MB each',
+                                style: TextStyle(
+                                  color: AdaptivePalette.muted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        DemoPhotoStrip(
+                          photos: _photos,
+                          onRemove: (photo) =>
+                              setState(() => _photos.remove(photo)),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _photoLimitReached
+                              ? '3 demo photos · Limit reached'
+                              : '${_photos.length} of 3 demo photos',
+                          style: TextStyle(
+                            color: AdaptivePalette.muted,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'JPG, PNG or WEBP · up to 5 MB each',
+                          style: TextStyle(
+                            color: AdaptivePalette.muted,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton.icon(
                               key: const Key('open-camera-preview'),
-                              onPressed: () => _showIntegrationNotice('Camera'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                              ),
+                              onPressed: _photoLimitReached
+                                  ? null
+                                  : () => _chooseDemoPhoto('camera'),
                               icon: const Icon(
                                 Icons.photo_camera_outlined,
                                 size: 18,
@@ -490,8 +573,14 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                           Expanded(
                             child: OutlinedButton.icon(
                               key: const Key('open-gallery-preview'),
-                              onPressed: () =>
-                                  _showIntegrationNotice('Gallery'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                              ),
+                              onPressed: _photoLimitReached
+                                  ? null
+                                  : () => _chooseDemoPhoto('gallery'),
                               icon: const Icon(Icons.image_outlined, size: 18),
                               label: const Text('Gallery'),
                             ),

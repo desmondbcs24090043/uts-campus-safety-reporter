@@ -144,8 +144,11 @@ void main() {
                   )
                   .first,
             );
-              await Scrollable.ensureVisible(tester.element(control), alignment: alignment);
-              await tester.pumpAndSettle();
+            await Scrollable.ensureVisible(
+              tester.element(control),
+              alignment: alignment,
+            );
+            await tester.pumpAndSettle();
           }
 
           Future<void> formControl(String key) async {
@@ -209,17 +212,31 @@ void main() {
           final sample = keyed('report-card-CSR-2026-001');
           await revealInList('dashboard-list', sample);
           await tap(sample);
-          final thumbnail = keyed('report-photo-thumbnail');
-          await revealInList('report-details', thumbnail, alignment: .76);
+          final thumbnail = keyed('open-assets/demo/corridor-light.jpg');
+          await revealInList('report-details', thumbnail, alignment: .50);
           final photoContext = tester.element(thumbnail);
-          await tester.runAsync(() => precacheImage(
-            const AssetImage('assets/demo/corridor-light.jpg'),
-            photoContext,
-          ));
+          await tester.runAsync(() async {
+            for (final asset in [
+              'corridor-light',
+              'corridor-side',
+              'corridor-fixture',
+            ]) {
+              await precacheImage(
+                AssetImage('assets/demo/$asset.jpg'),
+                photoContext,
+              );
+            }
+          });
           await tester.pumpAndSettle();
           await page('05a-attached-photo', thumbnail);
-          await tap(thumbnail);
+          final sidePhoto = keyed('open-assets/demo/corridor-side.jpg');
+          await tap(sidePhoto);
           await page('05b-photo-viewer', keyed('report-photo-viewer'));
+          expect(find.text('Demo photo 2 of 3'), findsOneWidget);
+          await tap(find.byTooltip('Next photo'));
+          expect(find.text('Demo photo 3 of 3'), findsOneWidget);
+          await tap(find.byTooltip('Previous photo'));
+          expect(find.text('Demo photo 2 of 3'), findsOneWidget);
           await tap(find.byTooltip('Close photo'));
           await back();
           final reportIssue = keyed('report-issue-cta');
@@ -247,6 +264,47 @@ void main() {
           );
           FocusManager.instance.primaryFocus?.unfocus();
           await tester.pumpAndSettle();
+          final gallery = keyed('open-gallery-preview');
+          await revealInList(
+            'report-issue-form',
+            gallery,
+            delta: -140,
+            alignment: .65,
+          );
+          expect(find.text('No photo attached'), findsOneWidget);
+          await tap(gallery);
+          await tap(find.text('Corridor'));
+          expect(find.text('1 of 3 demo photos'), findsOneWidget);
+          await formControl('open-camera-preview');
+          expect(find.text('Demo camera'), findsOneWidget);
+          await tap(find.text('Walkway crop'));
+          expect(find.text('2 of 3 demo photos'), findsOneWidget);
+          await tap(gallery);
+          await tap(find.text('Ceiling lights crop'));
+          expect(find.text('3 demo photos · Limit reached'), findsOneWidget);
+          expect(tester.widget<OutlinedButton>(gallery).onPressed, isNull);
+          expect(
+            tester
+                .widget<OutlinedButton>(keyed('open-camera-preview'))
+                .onPressed,
+            isNull,
+          );
+          await revealInList('report-issue-form', gallery, alignment: .72);
+          await page(
+            '06e-report-photos',
+            find.text('3 demo photos · Limit reached'),
+          );
+          await tap(find.byTooltip('Remove Walkway crop'));
+          expect(find.text('2 of 3 demo photos'), findsOneWidget);
+          expect(tester.widget<OutlinedButton>(gallery).onPressed, isNotNull);
+          await tap(gallery);
+          await tap(find.text('Walkway crop'));
+          expect(find.text('3 demo photos · Limit reached'), findsOneWidget);
+          await revealInList(
+            'report-issue-form',
+            keyed('report-specific-location'),
+            alignment: .46,
+          );
           await page('06d-location-fields', keyed('report-specific-location'));
           await formControl('choose-map-preview');
           await page('06a-location-sheet', find.text('Choose a location'));
@@ -257,6 +315,14 @@ void main() {
           await page('06b-review-sheet', find.text('Review your report'));
           expect(find.text('Beside the stairwell'), findsWidgets);
           expect(find.text('Demo coordinates'), findsOneWidget);
+          expect(find.text('3 demo photos'), findsOneWidget);
+          expect(
+            find.descendant(
+              of: find.byType(BottomSheet),
+              matching: find.byType(Image),
+            ),
+            findsNWidgets(3),
+          );
           await sheetButton('finish-demo-report');
           await page('06c-report-complete', find.text('UI preview complete'));
           await tap(keyed('report-preview-home'));

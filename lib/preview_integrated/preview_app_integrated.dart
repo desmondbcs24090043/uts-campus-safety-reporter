@@ -6,6 +6,7 @@ import '../features/reports/presentation/reports_bloc.dart';
 import '../features/reports/presentation/reports_event.dart';
 import '../features/reports/presentation/reports_state.dart';
 import '../preview/preview_theme.dart';
+import '../preview/demo_report_photos.dart';
 import '../preview/app_appearance.dart';
 import '../preview/report_issue_ui.dart';
 import '../preview/profile_settings_ui.dart';
@@ -1074,8 +1075,12 @@ class _ReportDetailsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _DetailSection(
-                heading: 'Attached Photo',
-                child: _AttachedReportPhoto(reportId: report.id),
+                heading: 'Attached Photos',
+                child: DemoAttachedPhotos(
+                  photos: report.id == 'CSR-2026-001'
+                      ? DemoReportPhoto.samples
+                      : const [],
+                ),
               ),
               const SizedBox(height: 20),
               _DetailSection(
@@ -1092,65 +1097,14 @@ class _ReportDetailsScreen extends StatelessWidget {
   }
 }
 
-class _AttachedReportPhoto extends StatelessWidget {
-  const _AttachedReportPhoto({required this.reportId});
+class DemoAttachedPhotos extends StatelessWidget {
+  const DemoAttachedPhotos({super.key, required this.photos});
 
-  final String reportId;
-
-  // This photo belongs only to the fictional corridor report.
-  static const _demoPhoto = 'assets/demo/corridor-light.jpg';
-
-  void _openPhoto(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        backgroundColor: AdaptivePalette.surface,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 6, 6, 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Demo photo',
-                        style: Theme.of(dialogContext).textTheme.titleMedium,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Close photo',
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: InteractiveViewer(
-                  key: const Key('report-photo-viewer'),
-                  child: AspectRatio(
-                    aspectRatio: 3 / 2,
-                    child: Image.asset(
-                      _demoPhoto,
-                      fit: BoxFit.contain,
-                      semanticLabel: 'Demo photo of a corridor light',
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  final List<DemoReportPhoto> photos;
 
   @override
   Widget build(BuildContext context) {
-    if (reportId != 'CSR-2026-001') {
+    if (photos.isEmpty) {
       return Row(
         children: [
           Icon(Icons.image_outlined, size: 19, color: AdaptivePalette.muted),
@@ -1165,38 +1119,107 @@ class _AttachedReportPhoto extends StatelessWidget {
       );
     }
 
+    final visiblePhotos = photos.take(3).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          button: true,
-          label: 'Enlarge demo photo',
-          child: Material(
-            color: AdaptivePalette.background,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-              side: BorderSide(color: AdaptivePalette.border),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              key: const Key('report-photo-thumbnail'),
-              onTap: () => _openPhoto(context),
-              child: Ink.image(
-                image: const AssetImage(_demoPhoto),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                height: 148,
-                child: const SizedBox.expand(),
-              ),
+        DemoPhotoStrip(
+          photos: visiblePhotos,
+          onOpen: (photo) => showDialog<void>(
+            context: context,
+            useSafeArea: false,
+            barrierDismissible: false,
+            builder: (_) => _DemoPhotoViewer(
+              photos: visiblePhotos,
+              initialIndex: visiblePhotos.indexOf(photo),
             ),
           ),
         ),
         const SizedBox(height: 9),
         Text(
-          'Demo photo · Tap to enlarge',
+          visiblePhotos.length == 1
+              ? 'Demo photo · Tap to enlarge'
+              : 'Demo photos · Tap to enlarge',
           style: TextStyle(color: AdaptivePalette.muted, fontSize: 12),
         ),
       ],
+    );
+  }
+}
+
+class _DemoPhotoViewer extends StatefulWidget {
+  const _DemoPhotoViewer({required this.photos, required this.initialIndex});
+
+  final List<DemoReportPhoto> photos;
+  final int initialIndex;
+
+  @override
+  State<_DemoPhotoViewer> createState() => _DemoPhotoViewerState();
+}
+
+class _DemoPhotoViewerState extends State<_DemoPhotoViewer> {
+  late int _index = widget.initialIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final photo = widget.photos[_index];
+    return Dialog.fullscreen(
+      backgroundColor: AdaptivePalette.surface,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 6, 6, 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.photos.length == 1
+                          ? 'Demo photo'
+                          : 'Demo photo ${_index + 1} of ${widget.photos.length}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Close photo',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: KeyedSubtree(
+                key: const Key('report-photo-viewer'),
+                child: InteractiveViewer(
+                  key: ValueKey(photo),
+                  child: Center(child: photo.image(fit: BoxFit.contain)),
+                ),
+              ),
+            ),
+            if (widget.photos.length > 1)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    tooltip: 'Previous photo',
+                    onPressed: _index == 0
+                        ? null
+                        : () => setState(() => _index--),
+                    icon: const Icon(Icons.chevron_left),
+                  ),
+                  IconButton(
+                    tooltip: 'Next photo',
+                    onPressed: _index == widget.photos.length - 1
+                        ? null
+                        : () => setState(() => _index++),
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
