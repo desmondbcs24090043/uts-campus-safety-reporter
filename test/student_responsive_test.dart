@@ -232,11 +232,11 @@ void main() {
           final sidePhoto = keyed('open-assets/demo/corridor-side.jpg');
           await tap(sidePhoto);
           await page('05b-photo-viewer', keyed('report-photo-viewer'));
-          expect(find.text('Demo photo 2 of 3'), findsOneWidget);
+          expect(find.text('Photo 2 of 3'), findsOneWidget);
           await tap(find.byTooltip('Next photo'));
-          expect(find.text('Demo photo 3 of 3'), findsOneWidget);
+          expect(find.text('Photo 3 of 3'), findsOneWidget);
           await tap(find.byTooltip('Previous photo'));
-          expect(find.text('Demo photo 2 of 3'), findsOneWidget);
+          expect(find.text('Photo 2 of 3'), findsOneWidget);
           await tap(find.byTooltip('Close photo'));
           await back();
           final reportIssue = keyed('report-issue-cta');
@@ -274,14 +274,14 @@ void main() {
           expect(find.text('No photo attached'), findsOneWidget);
           await tap(gallery);
           await tap(find.text('Corridor'));
-          expect(find.text('1 of 3 demo photos'), findsOneWidget);
+          expect(find.text('1 of 3 photos'), findsOneWidget);
           await formControl('open-camera-preview');
-          expect(find.text('Demo camera'), findsOneWidget);
+          expect(find.text('Select a photo'), findsOneWidget);
           await tap(find.text('Walkway crop'));
-          expect(find.text('2 of 3 demo photos'), findsOneWidget);
+          expect(find.text('2 of 3 photos'), findsOneWidget);
           await tap(gallery);
           await tap(find.text('Ceiling lights crop'));
-          expect(find.text('3 demo photos · Limit reached'), findsOneWidget);
+          expect(find.text('3 photos · Limit reached'), findsOneWidget);
           expect(tester.widget<OutlinedButton>(gallery).onPressed, isNull);
           expect(
             tester
@@ -292,14 +292,14 @@ void main() {
           await revealInList('report-issue-form', gallery, alignment: .72);
           await page(
             '06e-report-photos',
-            find.text('3 demo photos · Limit reached'),
+            find.text('3 photos · Limit reached'),
           );
           await tap(find.byTooltip('Remove Walkway crop'));
-          expect(find.text('2 of 3 demo photos'), findsOneWidget);
+          expect(find.text('2 of 3 photos'), findsOneWidget);
           expect(tester.widget<OutlinedButton>(gallery).onPressed, isNotNull);
           await tap(gallery);
           await tap(find.text('Walkway crop'));
-          expect(find.text('3 demo photos · Limit reached'), findsOneWidget);
+          expect(find.text('3 photos · Limit reached'), findsOneWidget);
           await revealInList(
             'report-issue-form',
             keyed('report-specific-location'),
@@ -314,8 +314,8 @@ void main() {
           await tap(keyed('report-preview-review'));
           await page('06b-review-sheet', find.text('Review your report'));
           expect(find.text('Beside the stairwell'), findsWidgets);
-          expect(find.text('Demo coordinates'), findsOneWidget);
-          expect(find.text('3 demo photos'), findsOneWidget);
+          expect(find.text('Sample coordinates'), findsOneWidget);
+          expect(find.text('3 photos selected'), findsOneWidget);
           expect(
             find.descendant(
               of: find.byType(BottomSheet),

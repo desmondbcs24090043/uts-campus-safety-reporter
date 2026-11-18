@@ -14,7 +14,7 @@ class CampusSafetyPreviewApp extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: AppAppearance.darkMode,
       builder: (context, dark, _) => MaterialApp(
-        title: 'Campus Safety Reporter · Demo',
+        title: 'Campus Safety Reporter',
         debugShowCheckedModeBanner: false,
         theme: buildPreviewTheme(dark: false),
         darkTheme: buildPreviewTheme(dark: true),
@@ -224,7 +224,7 @@ class _HomeScreen extends StatelessWidget {
               const SizedBox(width: 7),
               IconButton(
                 key: const Key('notifications-button'),
-                tooltip: 'Notifications (coming soon)',
+                tooltip: 'Notifications',
                 onPressed: onNotifications,
                 icon: Icon(
                   Icons.notifications_none_rounded,
@@ -308,8 +308,6 @@ class _HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          const _DemoNotice(),
         ],
       ),
     );
@@ -594,8 +592,7 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
               _FilterChip(
                 label: 'Pending',
                 selected: _filter == ReportStatus.pending,
-                onPressed: () =>
-                    setState(() => _filter = ReportStatus.pending),
+                onPressed: () => setState(() => _filter = ReportStatus.pending),
                 key: const Key('filter-pending'),
               ),
               _FilterChip(
@@ -690,8 +687,6 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
                 ),
               ),
             ),
-          const SizedBox(height: 17),
-          const _DemoNotice(),
         ],
       ),
     );
@@ -1053,8 +1048,6 @@ class _ReportDetailsScreen extends StatelessWidget {
                 heading: 'Report progress',
                 child: _StatusTimeline(status: report.status),
               ),
-              const SizedBox(height: 22),
-              const _DemoNotice(),
             ],
           ),
         ),
@@ -1207,15 +1200,6 @@ class _StatusTimeline extends StatelessWidget {
               ),
             ),
         ],
-        const SizedBox(height: 13),
-        Text(
-          'Illustrative status progression only. No real status history is stored in this preview.',
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11,
-            height: 1.4,
-          ),
-        ),
       ],
     );
   }
@@ -1273,8 +1257,6 @@ class _ProfileScreen extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 19),
-        const _DemoNotice(),
       ],
     ),
   );
@@ -1299,28 +1281,5 @@ class _DemoPill extends StatelessWidget {
         letterSpacing: .8,
       ),
     ),
-  );
-}
-
-class _DemoNotice extends StatelessWidget {
-  const _DemoNotice();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(Icons.info_outline_rounded, size: 16, color: AdaptivePalette.muted),
-      const SizedBox(width: 8),
-      Expanded(
-        child: Text(
-          'Demonstration only. Reports, locations, dates and statuses are fictional; Supabase is not connected.',
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11.5,
-            height: 1.5,
-          ),
-        ),
-      ),
-    ],
   );
 }

@@ -188,10 +188,6 @@ class _NotificationsV2PageState extends State<NotificationsV2Page> {
                       ),
                     ),
                   ),
-                if (widget.previewMode) ...[
-                  const SizedBox(height: 12),
-                  const _PreviewDisclaimer(),
-                ],
               ],
             ),
           ),
@@ -240,7 +236,7 @@ class _NotificationsV2PageState extends State<NotificationsV2Page> {
                 if (widget.previewMode) ...[
                   const SizedBox(height: 14),
                   Text(
-                    'Sample notification. No real report status or notification has been changed.',
+                    'Sample notification',
                     style: TextStyle(
                       color: AdaptivePalette.muted,
                       fontSize: 11.5,
@@ -500,28 +496,5 @@ class _DemoLabel extends StatelessWidget {
         letterSpacing: .8,
       ),
     ),
-  );
-}
-
-class _PreviewDisclaimer extends StatelessWidget {
-  const _PreviewDisclaimer();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(Icons.info_outline_rounded, color: AdaptivePalette.muted, size: 16),
-      SizedBox(width: 9),
-      Expanded(
-        child: Text(
-          'Sample notifications only. Read state is temporary; no real alerts are sent or saved.',
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11.5,
-            height: 1.5,
-          ),
-        ),
-      ),
-    ],
   );
 }

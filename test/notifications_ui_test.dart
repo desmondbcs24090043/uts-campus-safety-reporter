@@ -66,12 +66,12 @@ void main() {
       final toggle = find.byKey(const Key('settings-notifications-switch'));
       expect(find.byKey(const Key('settings-notifications')), findsOneWidget);
       expect(tester.widget<Switch>(toggle).value, true);
-      expect(find.text('Alerts on (UI preview only)'), findsOneWidget);
+      expect(find.text('Notification preference on'), findsOneWidget);
 
       await tester.tap(toggle);
       await tester.pumpAndSettle();
       expect(tester.widget<Switch>(toggle).value, false);
-      expect(find.text('Alerts off (UI preview only)'), findsOneWidget);
+      expect(find.text('Notification preference off'), findsOneWidget);
       expect(find.byKey(const Key('notifications-v2-page')), findsNothing);
 
       await tester.tap(toggle);

@@ -41,9 +41,7 @@ void main() {
         final image = find.descendant(of: viewer, matching: find.byType(Image));
         expect(tester.widget<Image>(image).image, AssetImage(photo.asset));
         expect(
-          find.text(
-            count == 1 ? 'Demo photo' : 'Demo photo ${index + 1} of $count',
-          ),
+          find.text(count == 1 ? 'Photo' : 'Photo ${index + 1} of $count'),
           findsOneWidget,
         );
         expect(

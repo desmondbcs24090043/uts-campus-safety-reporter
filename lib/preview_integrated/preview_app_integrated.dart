@@ -53,7 +53,7 @@ class CampusSafetyIntegratedPreviewApp extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: AppAppearance.darkMode,
       builder: (context, dark, _) => MaterialApp(
-        title: 'Campus Safety Reporter · Demo',
+        title: 'Campus Safety Reporter',
         debugShowCheckedModeBanner: false,
         theme: buildPreviewTheme(dark: false),
         darkTheme: buildPreviewTheme(dark: true),
@@ -309,7 +309,7 @@ class _HomeScreen extends StatelessWidget {
           if (state is ReportsInitial || state is ReportsLoading)
             const _PreviewMessageState(
               title: 'Loading reports',
-              description: 'Fetching demonstration reports...',
+              description: 'Loading reports...',
               showProgress: true,
             )
           else if (state is ReportsFailure) ...[
@@ -326,7 +326,7 @@ class _HomeScreen extends StatelessWidget {
           ] else if (records.isEmpty)
             const _PreviewMessageState(
               title: 'No reports available',
-              description: 'There are no demonstration reports to show.',
+              description: 'No reports to display.',
               icon: Icons.inbox_outlined,
             )
           else
@@ -339,8 +339,6 @@ class _HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-          const SizedBox(height: 8),
-          const _DemoNotice(),
         ],
       ),
     );
@@ -683,7 +681,7 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
           if (state is ReportsInitial || state is ReportsLoading)
             const _PreviewMessageState(
               title: 'Loading reports',
-              description: 'Fetching demonstration reports...',
+              description: 'Loading reports...',
               showProgress: true,
             )
           else if (state is ReportsFailure) ...[
@@ -711,8 +709,6 @@ class _MyReportsScreenState extends State<_MyReportsScreen> {
                 ),
               ),
             ),
-          const SizedBox(height: 17),
-          const _DemoNotice(),
         ],
       ),
     );
@@ -1087,8 +1083,6 @@ class _ReportDetailsScreen extends StatelessWidget {
                 heading: 'Report progress',
                 child: _StatusTimeline(status: report.status),
               ),
-              const SizedBox(height: 22),
-              const _DemoNotice(),
             ],
           ),
         ),
@@ -1138,8 +1132,8 @@ class DemoAttachedPhotos extends StatelessWidget {
         const SizedBox(height: 9),
         Text(
           visiblePhotos.length == 1
-              ? 'Demo photo · Tap to enlarge'
-              : 'Demo photos · Tap to enlarge',
+              ? 'Tap to enlarge'
+              : 'Tap a photo to enlarge',
           style: TextStyle(color: AdaptivePalette.muted, fontSize: 12),
         ),
       ],
@@ -1175,8 +1169,8 @@ class _DemoPhotoViewerState extends State<_DemoPhotoViewer> {
                   Expanded(
                     child: Text(
                       widget.photos.length == 1
-                          ? 'Demo photo'
-                          : 'Demo photo ${_index + 1} of ${widget.photos.length}',
+                          ? 'Photo'
+                          : 'Photo ${_index + 1} of ${widget.photos.length}',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -1368,15 +1362,6 @@ class _StatusTimeline extends StatelessWidget {
               ),
             ),
         ],
-        const SizedBox(height: 13),
-        Text(
-          'Illustrative status progression only. No real status history is stored in this preview.',
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11,
-            height: 1.4,
-          ),
-        ),
       ],
     );
   }
@@ -1401,28 +1386,5 @@ class _DemoPill extends StatelessWidget {
         letterSpacing: .8,
       ),
     ),
-  );
-}
-
-class _DemoNotice extends StatelessWidget {
-  const _DemoNotice();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(Icons.info_outline_rounded, size: 16, color: AdaptivePalette.muted),
-      const SizedBox(width: 8),
-      Expanded(
-        child: Text(
-          'Demonstration only. Reports, locations, dates and statuses are fictional; Supabase is not connected.',
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11.5,
-            height: 1.5,
-          ),
-        ),
-      ),
-    ],
   );
 }

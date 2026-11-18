@@ -126,8 +126,6 @@ class ProfileV2Page extends StatelessWidget {
               style: TextStyle(fontSize: 11, color: AdaptivePalette.muted),
             ),
           ],
-          const SizedBox(height: 20),
-          const _DemoNotice(),
         ],
       ),
     );
@@ -222,11 +220,6 @@ class _SettingsV2PageState extends State<SettingsV2Page> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Appearance applies to all Student App preview screens. This choice is restored when the app restarts.',
-                  style: TextStyle(color: subtle, fontSize: 11.5, height: 1.5),
-                ),
                 const SizedBox(height: 27),
                 Text('PREFERENCES', style: _sectionLabel(color: subtle)),
                 const SizedBox(height: 11),
@@ -258,8 +251,8 @@ class _SettingsV2PageState extends State<SettingsV2Page> {
                               const SizedBox(height: 4),
                               Text(
                                 _notificationsPreview
-                                    ? 'Alerts on (UI preview only)'
-                                    : 'Alerts off (UI preview only)',
+                                    ? 'Notification preference on'
+                                    : 'Notification preference off',
                                 style: TextStyle(color: subtle, fontSize: 11.5),
                               ),
                             ],
@@ -490,29 +483,6 @@ class _PreviewLabel extends StatelessWidget {
   );
 }
 
-class _DemoNotice extends StatelessWidget {
-  const _DemoNotice();
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(Icons.info_outline_rounded, size: 16, color: AdaptivePalette.muted),
-      SizedBox(width: 8),
-      Expanded(
-        child: Text(
-          'UI preview only. Account details are not connected to a live profile.',
-          style: TextStyle(
-            fontSize: 11.5,
-            height: 1.5,
-            color: AdaptivePalette.muted,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
 class _HelpPage extends StatelessWidget {
   const _HelpPage();
 
@@ -604,11 +574,8 @@ class _HelpPage extends StatelessWidget {
                 step: '03',
                 icon: Icons.notifications_none_rounded,
                 title: 'Check notifications',
-                description: 'Notifications will show report updates when the live notification feature is connected.',
-              ),
-              const SizedBox(height: 18),
-              const _InfoPreviewNote(
-                'UI preview only. Submitting reports and delivering live alerts are not connected yet.',
+                description:
+                    'Check Notifications for updates about your reports.',
               ),
             ],
           ),
@@ -785,31 +752,6 @@ class _AboutMetaRow extends StatelessWidget {
         ),
       ],
     ),
-  );
-}
-
-class _InfoPreviewNote extends StatelessWidget {
-  const _InfoPreviewNote(this.message);
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(Icons.info_outline_rounded, color: AdaptivePalette.muted, size: 16),
-      const SizedBox(width: 9),
-      Expanded(
-        child: Text(
-          message,
-          style: TextStyle(
-            color: AdaptivePalette.muted,
-            fontSize: 11.5,
-            height: 1.55,
-          ),
-        ),
-      ),
-    ],
   );
 }
 

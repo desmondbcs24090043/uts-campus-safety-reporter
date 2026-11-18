@@ -54,13 +54,11 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Demo $source',
+                'Select a photo',
                 style: Theme.of(sheetContext).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Choose a sample photo. No device photos are accessed.',
-              ),
+              const Text('Choose a sample photo.'),
               const SizedBox(height: 12),
               for (final sample in DemoReportPhoto.samples)
                 if (!_photos.contains(sample))
@@ -86,9 +84,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
 
   void _selectDemoLocation() {
     setState(() => _sampleLocationSelected = true);
-    _showMessage(
-      'Demo location selected. Your real location was not accessed.',
-    );
+    _showMessage('Sample location selected.');
   }
 
   void _chooseOnMapPreview() {
@@ -123,8 +119,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Interactive map selection is not available in this demo. '
-              'You can use a sample location to preview the reporting flow.',
+              'Choose a sample location to continue.',
               style: TextStyle(
                 color: AdaptivePalette.muted,
                 fontSize: 14,
@@ -146,7 +141,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Text('Use demo location'),
+              child: const Text('Use sample location'),
             ),
           ],
         ),
@@ -259,8 +254,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         label: 'Photo',
                         value: switch (_photos.length) {
                           0 => 'No photo attached',
-                          1 => '1 demo photo',
-                          final count => '$count demo photos',
+                          1 => '1 photo selected',
+                          final count => '$count photos selected',
                         },
                       ),
                       if (_photos.isNotEmpty) ...[
@@ -279,34 +274,12 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                       if (_sampleLocationSelected) ...[
                         Divider(color: AdaptivePalette.border, height: 22),
                         const _ReviewLine(
-                          label: 'Demo coordinates',
+                          label: 'Sample coordinates',
                           value: '$_demoLatitude, $_demoLongitude',
                         ),
                       ],
                     ],
                   ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 17,
-                      color: AdaptivePalette.muted,
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Preview only. No report, photo or location will be submitted.',
-                        style: TextStyle(
-                          color: AdaptivePalette.muted,
-                          fontSize: 12,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 18),
                 Row(
@@ -533,8 +506,8 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         const SizedBox(height: 8),
                         Text(
                           _photoLimitReached
-                              ? '3 demo photos · Limit reached'
-                              : '${_photos.length} of 3 demo photos',
+                              ? '3 photos · Limit reached'
+                              : '${_photos.length} of 3 photos',
                           style: TextStyle(
                             color: AdaptivePalette.muted,
                             fontSize: 12,
@@ -603,7 +576,6 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Campus Area (required)',
-                          helperText: 'Demo options only.',
                           border: OutlineInputBorder(),
                         ),
                         items: [
@@ -663,20 +635,10 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 9),
-                      Text(
-                        'Optional demo aids · Both use sample coordinates.',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          height: 1.4,
-                          color: AdaptivePalette.muted,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
                       if (_sampleLocationSelected) ...[
                         const SizedBox(height: 10),
                         Text(
-                          'Demo location selected',
+                          'Sample location selected',
                           key: const Key('report-location-panel'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -686,7 +648,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                           ),
                         ),
                         Text(
-                          '$_demoLatitude, $_demoLongitude · Not live GPS',
+                          'Sample coordinates: $_demoLatitude, $_demoLongitude',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: AdaptivePalette.muted,
@@ -695,17 +657,6 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                         ),
                       ],
                     ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    'Preview only · No data will be saved or uploaded',
-                    style: TextStyle(
-                      color: AdaptivePalette.muted,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -901,20 +852,10 @@ class _ReportPreviewCompletePage extends StatelessWidget {
                     color: AdaptivePalette.ink,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'You have reached the end of the reporting preview.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AdaptivePalette.muted,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
                 const SizedBox(height: 20),
                 const _InfoNotice(
                   icon: Icons.info_outline_rounded,
-                  message: 'No report was submitted. No photo or location was sent or saved.',
+                  message: 'No report was submitted.',
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
