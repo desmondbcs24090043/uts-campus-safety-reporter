@@ -60,7 +60,8 @@ final List<DemoReport> demoReports = List.unmodifiable([
     title: 'Damaged classroom chair',
     category: 'Facilities',
     location: 'Teaching room (demo)',
-    description: 'A chair has a loose leg and should be inspected before it is used.',
+    description:
+        'A chair has a loose leg and should be inspected before it is used.',
     status: ReportStatus.pending,
     createdAt: DateTime(2026, 11, 8),
     icon: Icons.chair_alt_outlined,
@@ -90,7 +91,8 @@ final List<DemoReport> demoReports = List.unmodifiable([
     title: 'Damaged campus bench',
     category: 'Facilities',
     location: 'Outdoor seating area (demo)',
-    description: 'A bench was damaged. This example is not a real campus report.',
+    description:
+        'A bench was damaged. This example is not a real campus report.',
     status: ReportStatus.resolved,
     createdAt: DateTime(2026, 11, 2),
     icon: Icons.park_outlined,
@@ -99,8 +101,18 @@ final List<DemoReport> demoReports = List.unmodifiable([
 
 String formatDemoDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }

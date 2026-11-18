@@ -80,7 +80,6 @@ void main() {
 
     expect(find.text('2 reports'), findsOneWidget);
     expect(find.text('Lighting'), findsOneWidget);
-    expect(find.text('Safety Hazard'), findsOneWidget);
 
     await tester.tap(
       find.byKey(const Key('report-card-test-001')),
@@ -92,6 +91,19 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('test-001'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final safetyReport = find.text('Safety Hazard');
+    await tester.scrollUntilVisible(
+      safetyReport,
+      120,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('my-reports-list')),
+        matching: find.byType(Scrollable),
+      ).first,
+    );
+    expect(safetyReport, findsOneWidget);
   });
 
   testWidgets('Status filtering and search work', (tester) async {

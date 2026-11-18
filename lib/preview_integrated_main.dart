@@ -6,10 +6,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'features/reports/data/demo_reports_repository.dart';
 import 'features/reports/presentation/reports_bloc.dart';
 import 'features/reports/presentation/reports_event.dart';
+import 'preview/app_appearance.dart';
 import 'preview_integrated/preview_app_integrated.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppAppearance.restore();
   runApp(const CampusSafetyIntegratedRoot());
 }
 
