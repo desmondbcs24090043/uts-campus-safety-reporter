@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/incident_report.dart';
 import '../../data/models/report_status.dart';
@@ -7,8 +8,7 @@ import '../../data/repositories/incident_report_repository.dart';
 import '../../data/repositories/repository_exception.dart';
 import '../widgets/status_chip.dart';
 
-/// Web Admin: full details of one report, its private photo (signed URL)
-/// and the status update control.
+/// Staff-only report details. Repository rules and write permissions are unchanged.
 class ReportDetailPage extends StatefulWidget {
   const ReportDetailPage({
     super.key,
@@ -29,9 +29,8 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
   String? _photoError;
   String? _error;
   bool _loading = true;
-
-  ReportStatus? _selected; // status chosen in the UI, not yet saved
   bool _saving = false;
+  ReportStatus? _selected;
 
   IncidentReportRepository get _repo => widget.repository;
 
@@ -48,67 +47,90 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
     });
     try {
       final report = await _repo.fetchReport(widget.reportId);
-      String? url;
+      String? photoUrl;
       String? photoError;
-      try {
-        url = await _repo.photoUrl(report.photoPath);
-      } on RepositoryException catch (e) {
-        photoError = e.message;
+      if (report.photoPath != null) {
+        try {
+          photoUrl = await _repo.photoUrl(report.photoPath);
+        } on RepositoryException catch (error) {
+          photoError = error.message;
+        }
       }
       if (!mounted) return;
       setState(() {
         _report = report;
         _selected = report.status;
-        _photoUrl = url;
+        _photoUrl = photoUrl;
         _photoError = photoError;
         _loading = false;
       });
-    } on RepositoryException catch (e) {
+    } on RepositoryException catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = e.message;
+        _error = error.message;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'Could not load this report. Please try again.';
         _loading = false;
       });
     }
   }
 
   Future<void> _saveStatus() async {
-    final report = _report!;
-    final newStatus = _selected!;
-    final ok = await showDialog<bool>(
+    final report = _report;
+    final status = _selected;
+    if (_saving ||
+        report == null ||
+        status == null ||
+        status == report.status) {
+      return;
+    }
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Change status?'),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Change report status?'),
         content: Text(
-            'Change this report from "${report.status.label}" to "${newStatus.label}"?'),
+          'Change this report from "${report.status.label}" to "${status.label}"?',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Confirm')),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Confirm'),
+          ),
         ],
       ),
     );
-    if (ok != true || !mounted) return;
+    if (confirmed != true || !mounted) return;
 
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final updated = await _repo.updateStatus(report.id, newStatus);
+      final updated = await _repo.updateStatus(report.id, status);
       if (!mounted) return;
       setState(() {
         _report = updated;
         _selected = updated.status;
       });
       messenger.showSnackBar(
-          SnackBar(content: Text('Status updated to ${updated.status.label}.')));
-    } on RepositoryException catch (e) {
-      messenger.showSnackBar(SnackBar(
-        content: Text(e.message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ));
+        SnackBar(content: Text('Status updated to ${updated.status.label}.')),
+      );
+    } on RepositoryException catch (error) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Could not save status. Please try again.'),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -117,177 +139,322 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Details')),
+      appBar: AppBar(toolbarHeight: 74, title: const Text('Report details')),
       body: _buildBody(context),
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     if (_error != null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48),
-            const SizedBox(height: 12),
+            const Icon(Icons.cloud_off_outlined, size: 40),
+            const SizedBox(height: 14),
             Text(_error!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             FilledButton(onPressed: _load, child: const Text('Retry')),
           ],
         ),
       );
     }
-    final r = _report!;
-    return LayoutBuilder(builder: (context, c) {
-      final wide = c.maxWidth >= 900;
-      final photo = _PhotoPanel(url: _photoUrl, error: _photoError, hasPhoto: r.photoPath != null);
-      final info = _InfoPanel(
-        report: r,
-        selected: _selected!,
-        saving: _saving,
-        onSelect: (s) => setState(() => _selected = s),
-        onSave: _selected != r.status ? _saveStatus : null,
-      );
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1100),
-            child: wide
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: photo),
-                      const SizedBox(width: 16),
-                      Expanded(child: info),
-                    ],
-                  )
-                : Column(children: [photo, const SizedBox(height: 16), info]),
+    final report = _report!;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasMedia = report.photoPath != null;
+        final wide = hasMedia && constraints.maxWidth >= 920;
+        final details = _ReportInfoCard(
+          report: report,
+          selected: _selected!,
+          saving: _saving,
+          onSelected: (value) => setState(() => _selected = value),
+          onSave: _selected == report.status ? null : _saveStatus,
+        );
+        final media = hasMedia
+            ? _MediaPreview(url: _photoUrl, error: _photoError)
+            : const _MediaEmptyNote();
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(22, 24, 22, 52),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: hasMedia ? 1180 : 940),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'INCIDENT REPORT',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      letterSpacing: 1.5,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    report.category.label,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 23),
+                  if (wide)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 4, child: media),
+                        const SizedBox(width: 18),
+                        Expanded(flex: 6, child: details),
+                      ],
+                    )
+                  else ...[
+                    details,
+                    const SizedBox(height: 16),
+                    media,
+                  ],
+                ],
+              ),
+            ),
           ),
-        ),
-      );
-    });
-  }
-}
-
-class _PhotoPanel extends StatelessWidget {
-  const _PhotoPanel({required this.url, required this.error, required this.hasPhoto});
-
-  final String? url;
-  final String? error;
-  final bool hasPhoto;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child;
-    if (!hasPhoto) {
-      child = const _Placeholder(icon: Icons.hide_image_outlined, text: 'No photo attached');
-    } else if (url == null) {
-      child = _Placeholder(icon: Icons.broken_image_outlined, text: error ?? 'Photo unavailable');
-    } else {
-      child = Image.network(
-        url!,
-        fit: BoxFit.contain,
-        loadingBuilder: (context, w, progress) => progress == null
-            ? w
-            : const Center(child: CircularProgressIndicator()),
-        errorBuilder: (context, e, s) => const _Placeholder(
-            icon: Icons.broken_image_outlined, text: 'Could not load photo'),
-      );
-    }
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: AspectRatio(aspectRatio: 4 / 3, child: child),
+        );
+      },
     );
   }
 }
 
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({required this.icon, required this.text});
-  final IconData icon;
-  final String text;
+class _MediaEmptyNote extends StatelessWidget {
+  const _MediaEmptyNote();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [Icon(icon, size: 48), const SizedBox(height: 8), Text(text)],
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+        child: Row(
+          children: [
+            Icon(
+              Icons.image_not_supported_outlined,
+              size: 20,
+              color: scheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'No photo attached',
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _InfoPanel extends StatelessWidget {
-  const _InfoPanel({
-    required this.report,
-    required this.selected,
-    required this.saving,
-    required this.onSelect,
-    required this.onSave,
-  });
-
-  final IncidentReport report;
-  final ReportStatus selected;
-  final bool saving;
-  final ValueChanged<ReportStatus> onSelect;
-  final VoidCallback? onSave;
+class _MediaPreview extends StatelessWidget {
+  const _MediaPreview({required this.url, required this.error});
+  final String? url;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
+    Widget media;
+    if (url == null) {
+      media = _MediaPlaceholder(error ?? 'Photo unavailable');
+    } else {
+      media = Image.network(
+        url!,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, image, progress) => progress == null
+            ? image
+            : const Center(child: CircularProgressIndicator()),
+        errorBuilder: (context, error, stack) =>
+            const _MediaPlaceholder('Could not load photo'),
+      );
+    }
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(17, 17, 17, 12),
+            child: Text(
+              'Attached photo',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: media,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaPlaceholder extends StatelessWidget {
+  const _MediaPlaceholder(this.message);
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.broken_image_outlined, size: 35),
+          const SizedBox(height: 10),
+          Text(message),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReportInfoCard extends StatelessWidget {
+  const _ReportInfoCard({
+    required this.report,
+    required this.selected,
+    required this.saving,
+    required this.onSelected,
+    required this.onSave,
+  });
+  final IncidentReport report;
+  final ReportStatus selected;
+  final bool saving;
+  final ValueChanged<ReportStatus> onSelected;
+  final VoidCallback? onSave;
+
+  void _copy(BuildContext context, String label, String value) {
+    Clipboard.setData(ClipboardData(text: value));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('$label copied')));
+  }
+
+  Future<void> _openMap(BuildContext context) async {
+    final lat = report.latitude;
+    final lon = report.longitude;
+    final url = Uri.parse(
+      'https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=18/$lat/$lon',
+    );
+    try {
+      final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!opened && context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Unable to open map.')));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Unable to open map.')));
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final coords =
         '${report.latitude.toStringAsFixed(6)}, ${report.longitude.toStringAsFixed(6)}';
-    final mapLink =
-        'https://www.openstreetmap.org/?mlat=${report.latitude}&mlon=${report.longitude}#map=18/${report.latitude}/${report.longitude}';
-
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(child: Text(report.category.label, style: t.headlineSmall)),
+                Expanded(
+                  child: Text(
+                    'Report information',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                ),
                 StatusChip(report.status),
               ],
             ),
-            const SizedBox(height: 16),
-            Text('Description', style: t.labelLarge),
-            const SizedBox(height: 4),
-            SelectableText(report.description, style: t.bodyLarge),
-            const Divider(height: 32),
-            _row(context, Icons.place_outlined, 'Location', coords,
-                copy: coords),
-            _row(context, Icons.map_outlined, 'Map link', mapLink, copy: mapLink),
-            _row(context, Icons.event_outlined, 'Submitted',
-                formatDateTime(report.createdAt)),
-            _row(context, Icons.update, 'Last updated',
-                formatDateTime(report.updatedAt)),
-            _row(context, Icons.tag, 'Report ID', report.id, copy: report.id),
-            const Divider(height: 32),
-            Text('Update status', style: t.titleMedium),
-            const SizedBox(height: 12),
-            SegmentedButton<ReportStatus>(
-              segments: [
-                for (final s in ReportStatus.values)
-                  ButtonSegment(
-                      value: s, label: Text(s.label), icon: Icon(StatusChip.iconFor(s))),
-              ],
-              selected: {selected},
-              onSelectionChanged: saving ? null : (set) => onSelect(set.first),
+            const SizedBox(height: 24),
+            Text('Description', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            SelectableText(
+              report.description,
+              style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
-            const SizedBox(height: 12),
+            const Divider(height: 38),
+            _InfoRow(
+              icon: Icons.place_outlined,
+              title: 'Location',
+              value: coords,
+              onCopy: () => _copy(context, 'Location', coords),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(35, 0, 0, 8),
+              child: TextButton.icon(
+                onPressed: () => _openMap(context),
+                icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                label: const Text('View on map'),
+              ),
+            ),
+            _InfoRow(
+              icon: Icons.event_outlined,
+              title: 'Submitted',
+              value: formatDateTime(report.createdAt),
+            ),
+            _InfoRow(
+              icon: Icons.update_outlined,
+              title: 'Last updated',
+              value: formatDateTime(report.updatedAt),
+            ),
+            _InfoRow(
+              icon: Icons.tag_rounded,
+              title: 'Report ID',
+              value: report.id,
+              onCopy: () => _copy(context, 'Report ID', report.id),
+            ),
+            const Divider(height: 38),
+            Text('Update status', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Text(
+              'Changes are saved to the shared database.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SegmentedButton<ReportStatus>(
+                segments: [
+                  for (final s in ReportStatus.values)
+                    ButtonSegment<ReportStatus>(
+                      value: s,
+                      label: Text(s.label),
+                      icon: Icon(StatusChip.iconFor(s), size: 16),
+                    ),
+                ],
+                selected: {selected},
+                onSelectionChanged: saving
+                    ? null
+                    : (values) => onSelected(values.first),
+              ),
+            ),
+            const SizedBox(height: 17),
             FilledButton.icon(
               onPressed: saving ? null : onSave,
               icon: saving
                   ? const SizedBox(
-                      width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Icon(Icons.save_outlined),
               label: const Text('Save status'),
             ),
@@ -296,28 +463,43 @@ class _InfoPanel extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _row(BuildContext context, IconData icon, String label, String value,
-      {String? copy}) {
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.title,
+    required this.value,
+    this.onCopy,
+  });
+  final IconData icon;
+  final String title;
+  final String value;
+  final VoidCallback? onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          SizedBox(width: 110, child: Text(label, style: Theme.of(context).textTheme.labelLarge)),
-          Expanded(child: SelectableText(value)),
-          if (copy != null)
+          Icon(icon, size: 19, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 14),
+          SizedBox(
+            width: 104,
+            child: Text(title, style: theme.textTheme.labelMedium),
+          ),
+          Expanded(
+            child: SelectableText(value, style: theme.textTheme.bodyMedium),
+          ),
+          if (onCopy != null)
             IconButton(
-              tooltip: 'Copy',
+              tooltip: 'Copy $title',
               visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.copy, size: 16),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: copy));
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('$label copied')));
-              },
+              icon: const Icon(Icons.copy_rounded, size: 16),
+              onPressed: onCopy,
             ),
         ],
       ),

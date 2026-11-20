@@ -5,22 +5,26 @@ import '../data/models/user_role.dart';
 import '../data/repositories/profile_repository.dart';
 import 'pages/admin_login_page.dart';
 import 'pages/report_list_page.dart';
+import 'admin_theme.dart';
+import 'admin_appearance.dart';
 
 /// Root widget of the Web Admin.
-/// TODO(Member 2): replace the theme with the team's shared design system.
+/// Shares the Student App colour tokens with the staff workspace.
 class AdminApp extends StatelessWidget {
   const AdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UTS Campus Safety - Admin',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F4E79)),
-        useMaterial3: true,
+    return AnimatedBuilder(
+      animation: AdminAppearance.instance,
+      builder: (context, child) => MaterialApp(
+        title: 'UTS Campus Safety - Admin',
+        debugShowCheckedModeBanner: false,
+        theme: buildAdminTheme(),
+        darkTheme: buildAdminTheme(dark: true),
+        themeMode: AdminAppearance.instance.themeMode,
+        home: const AdminAuthGate(),
       ),
-      home: const AdminAuthGate(),
     );
   }
 }
@@ -64,7 +68,9 @@ class _RoleCheckState extends State<_RoleCheck> {
       future: _role,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         if (snapshot.hasError) {
           return _Message(

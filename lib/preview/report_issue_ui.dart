@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/models/report_category.dart';
 import 'demo_report_photos.dart';
+import 'native_media_picker.dart';
 import 'preview_theme.dart';
 
 /// Member 2 UI-only hand-off for Member 3's incident reporting feature.
@@ -21,6 +22,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   final _description = TextEditingController();
   final _specificLocation = TextEditingController();
   final _photos = <DemoReportPhoto>[];
+  final _nativeMediaSelection = NativeMediaSelection();
   bool get _photoLimitReached =>
       _photos.length == DemoReportPhoto.samples.length;
   ReportCategory? _category;
@@ -36,6 +38,7 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
   void dispose() {
     _description.dispose();
     _specificLocation.dispose();
+    _nativeMediaSelection.dispose();
     super.dispose();
   }
 
@@ -251,12 +254,24 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                       ),
                       Divider(color: AdaptivePalette.border, height: 22),
                       _ReviewLine(
-                        label: 'Photo',
-                        value: switch (_photos.length) {
-                          0 => 'No photo attached',
-                          1 => '1 photo selected',
-                          final count => '$count photos selected',
-                        },
+                        label:
+                            const bool.fromEnvironment(
+                              'REAL_MEDIA',
+                              defaultValue: false,
+                            )
+                            ? 'Media'
+                            : 'Photo',
+                        value:
+                            const bool.fromEnvironment(
+                              'REAL_MEDIA',
+                              defaultValue: false,
+                            )
+                            ? _nativeMediaSelection.summary
+                            : switch (_photos.length) {
+                                0 => 'No photo attached',
+                                1 => '1 photo selected',
+                                final count => '$count photos selected',
+                              },
                       ),
                       if (_photos.isNotEmpty) ...[
                         const SizedBox(height: 8),
@@ -454,115 +469,124 @@ class _ReportIssuePreviewPageState extends State<ReportIssuePreviewPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _FormCard(
-                  heading: 'Photo',
-                  supporting: 'Add up to 3 photos to help staff understand the issue (optional).',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (_photos.isEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 22,
-                            horizontal: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AdaptivePalette.background,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AdaptivePalette.border),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.add_photo_alternate_outlined,
-                                color: AdaptivePalette.blue,
-                                size: 26,
-                              ),
-                              SizedBox(height: 7),
-                              Text(
-                                'No photo attached',
-                                style: TextStyle(
-                                  color: AdaptivePalette.ink,
-                                  fontWeight: FontWeight.w600,
+                if (const bool.fromEnvironment(
+                  'REAL_MEDIA',
+                  defaultValue: false,
+                ))
+                  NativeMediaPickerCard(selection: _nativeMediaSelection)
+                else
+                  _FormCard(
+                    heading: 'Photo',
+                    supporting: 'Add up to 3 photos to help staff understand the issue (optional).',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_photos.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 22,
+                              horizontal: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AdaptivePalette.background,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AdaptivePalette.border),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  color: AdaptivePalette.blue,
+                                  size: 26,
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'JPG, PNG or WEBP · up to 5 MB each',
-                                style: TextStyle(
-                                  color: AdaptivePalette.muted,
-                                  fontSize: 12,
+                                SizedBox(height: 7),
+                                Text(
+                                  'No photo attached',
+                                  style: TextStyle(
+                                    color: AdaptivePalette.ink,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      else ...[
-                        DemoPhotoStrip(
-                          photos: _photos,
-                          onRemove: (photo) =>
-                              setState(() => _photos.remove(photo)),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _photoLimitReached
-                              ? '3 photos · Limit reached'
-                              : '${_photos.length} of 3 photos',
-                          style: TextStyle(
-                            color: AdaptivePalette.muted,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'JPG, PNG or WEBP · up to 5 MB each',
-                          style: TextStyle(
-                            color: AdaptivePalette.muted,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              key: const Key('open-camera-preview'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
+                                SizedBox(height: 4),
+                                Text(
+                                  'JPG, PNG or WEBP · up to 5 MB each',
+                                  style: TextStyle(
+                                    color: AdaptivePalette.muted,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                              onPressed: _photoLimitReached
-                                  ? null
-                                  : () => _chooseDemoPhoto('camera'),
-                              icon: const Icon(
-                                Icons.photo_camera_outlined,
-                                size: 18,
-                              ),
-                              label: const Text('Camera'),
+                              ],
+                            ),
+                          )
+                        else ...[
+                          DemoPhotoStrip(
+                            photos: _photos,
+                            onRemove: (photo) =>
+                                setState(() => _photos.remove(photo)),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _photoLimitReached
+                                ? '3 photos · Limit reached'
+                                : '${_photos.length} of 3 photos',
+                            style: TextStyle(
+                              color: AdaptivePalette.muted,
+                              fontSize: 12,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              key: const Key('open-gallery-preview'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                ),
-                              ),
-                              onPressed: _photoLimitReached
-                                  ? null
-                                  : () => _chooseDemoPhoto('gallery'),
-                              icon: const Icon(Icons.image_outlined, size: 18),
-                              label: const Text('Gallery'),
+                          Text(
+                            'JPG, PNG or WEBP · up to 5 MB each',
+                            style: TextStyle(
+                              color: AdaptivePalette.muted,
+                              fontSize: 12,
                             ),
                           ),
                         ],
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                key: const Key('open-camera-preview'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                ),
+                                onPressed: _photoLimitReached
+                                    ? null
+                                    : () => _chooseDemoPhoto('camera'),
+                                icon: const Icon(
+                                  Icons.photo_camera_outlined,
+                                  size: 18,
+                                ),
+                                label: const Text('Camera'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                key: const Key('open-gallery-preview'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                ),
+                                onPressed: _photoLimitReached
+                                    ? null
+                                    : () => _chooseDemoPhoto('gallery'),
+                                icon: const Icon(
+                                  Icons.image_outlined,
+                                  size: 18,
+                                ),
+                                label: const Text('Gallery'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: 14),
                 _FormCard(
                   heading: 'Location',

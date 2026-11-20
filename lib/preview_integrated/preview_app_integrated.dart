@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../features/reports/domain/report_record.dart';
+import '../features/reports/data/supabase_reports_adapter.dart';
+import '../features/reports/presentation/report_details_loader.dart';
+import '../data/repositories/incident_report_repository.dart';
 import '../features/reports/presentation/reports_bloc.dart';
 import '../features/reports/presentation/reports_event.dart';
 import '../features/reports/presentation/reports_state.dart';
@@ -11,6 +14,7 @@ import '../preview/app_appearance.dart';
 import '../preview/report_issue_ui.dart';
 import '../preview/profile_settings_ui.dart';
 import '../preview/notifications_ui.dart';
+import '../preview/campus_feed_ui.dart';
 
 // Presentation-only icon mapping. ReportRecord stays API-neutral.
 IconData _iconForReport(ReportRecord report) => switch (report.title) {
@@ -42,11 +46,16 @@ String _formatReportDate(DateTime date) {
 }
 
 // Member 2 V2 UI integration: original V1 design with V2 BLoC data.
-// This is an independent demo; no Authentication or Supabase integration.
+// Demo callers keep fixture Details; the live entry injects read-only Details.
 class CampusSafetyIntegratedPreviewApp extends StatelessWidget {
-  const CampusSafetyIntegratedPreviewApp({super.key, this.onSignOut});
+  const CampusSafetyIntegratedPreviewApp({
+    super.key,
+    this.onSignOut,
+    this.reportDetailsBuilder,
+  });
 
   final VoidCallback? onSignOut;
+  final Widget Function(String reportId)? reportDetailsBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -58,16 +67,20 @@ class CampusSafetyIntegratedPreviewApp extends StatelessWidget {
         theme: buildPreviewTheme(dark: false),
         darkTheme: buildPreviewTheme(dark: true),
         themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-        home: _PreviewShell(onSignOut: onSignOut),
+        home: _PreviewShell(
+          onSignOut: onSignOut,
+          reportDetailsBuilder: reportDetailsBuilder,
+        ),
       ),
     );
   }
 }
 
 class _PreviewShell extends StatefulWidget {
-  const _PreviewShell({this.onSignOut});
+  const _PreviewShell({this.onSignOut, this.reportDetailsBuilder});
 
   final VoidCallback? onSignOut;
+  final Widget Function(String reportId)? reportDetailsBuilder;
 
   @override
   State<_PreviewShell> createState() => _PreviewShellState();
@@ -77,6 +90,16 @@ class _PreviewShellState extends State<_PreviewShell> {
   int _selectedIndex = 0;
 
   void _openDetails(ReportRecord report) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            widget.reportDetailsBuilder?.call(report.id) ??
+            _ReportDetailsScreen(report: report),
+      ),
+    );
+  }
+
+  void _openDemoDetails(ReportRecord report) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => _ReportDetailsScreen(report: report),
@@ -110,6 +133,19 @@ class _PreviewShellState extends State<_PreviewShell> {
                 },
               ),
               _MyReportsScreen(onOpenReport: _openDetails),
+              CampusFeedPreviewPage(
+                onOpenReport: (report) => _openDemoDetails(
+                  ReportRecord(
+                    id: report.id,
+                    title: report.title,
+                    category: report.category,
+                    location: report.location,
+                    description: report.description,
+                    status: ReportStatus.values.byName(report.status.name),
+                    createdAt: report.createdAt,
+                  ),
+                ),
+              ),
               ProfileV2Page(onSignOut: widget.onSignOut),
             ],
           ),
@@ -142,6 +178,12 @@ class _PreviewShellState extends State<_PreviewShell> {
                     icon: Icon(Icons.description_outlined),
                     selectedIcon: Icon(Icons.description_rounded),
                     label: 'My Reports',
+                  ),
+                  NavigationDestination(
+                    key: Key('nav-campus'),
+                    icon: Icon(Icons.groups_2_outlined),
+                    selectedIcon: Icon(Icons.groups_2_rounded),
+                    label: 'Campus',
                   ),
                   NavigationDestination(
                     key: Key('nav-profile'),
@@ -927,7 +969,7 @@ class _ReportCard extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge(this.status);
+  const _StatusBadge(this.status, {super.key});
   final ReportStatus status;
 
   @override
@@ -964,25 +1006,150 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
+AppBar _reportDetailsAppBar() => AppBar(
+  title: const Text(
+    'Report Details',
+    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+  ),
+  actions: const [
+    Padding(
+      padding: EdgeInsets.only(right: 18),
+      child: Center(child: _DemoPill()),
+    ),
+  ],
+);
+
+/// Read-only live route. Demo routes continue to use their fixture records.
+class LiveStudentReportDetailsPage extends StatefulWidget {
+  const LiveStudentReportDetailsPage({
+    super.key,
+    required this.reportId,
+    required this.repository,
+    required this.currentUserId,
+    required this.identityChanges,
+  });
+
+  final String reportId;
+  final IncidentReportRepository repository;
+  final String? Function() currentUserId;
+  final Stream<String?> identityChanges;
+
+  @override
+  State<LiveStudentReportDetailsPage> createState() =>
+      _LiveStudentReportDetailsPageState();
+}
+
+class _LiveStudentReportDetailsPageState
+    extends State<LiveStudentReportDetailsPage> {
+  late ReportDetailsLoader _loader;
+
+  @override
+  void initState() {
+    super.initState();
+    _createLoader();
+  }
+
+  void _createLoader() {
+    _loader = ReportDetailsLoader(
+      reportId: widget.reportId,
+      repository: widget.repository,
+      currentUserId: widget.currentUserId,
+      identityChanges: widget.identityChanges,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant LiveStudentReportDetailsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.reportId != widget.reportId ||
+        oldWidget.repository != widget.repository ||
+        oldWidget.currentUserId != widget.currentUserId ||
+        oldWidget.identityChanges != widget.identityChanges) {
+      _loader.dispose();
+      _createLoader();
+    }
+  }
+
+  @override
+  void dispose() {
+    _loader.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _loader,
+    builder: (context, _) {
+      final state = _loader.state;
+      final report = state.report;
+      if (state.status == ReportDetailsStatus.loaded && report != null) {
+        return _ReportDetailsScreen(
+          report: SupabaseReportsAdapter.toRecord(report),
+          attachedPhotos: report.photoPath == null || report.photoPath!.isEmpty
+              ? const DemoAttachedPhotos(photos: [])
+              : Text(
+                  'Photo preview unavailable',
+                  style: TextStyle(
+                    color: AdaptivePalette.muted,
+                    fontSize: 13.5,
+                  ),
+                ),
+        );
+      }
+      final (title, description) = switch (state.status) {
+        ReportDetailsStatus.loading => (
+          'Loading report',
+          'Fetching the latest details…',
+        ),
+        ReportDetailsStatus.notFound ||
+        ReportDetailsStatus.permissionDenied => (
+          'Report unavailable',
+          'This report was not found or you do not have access.',
+        ),
+        ReportDetailsStatus.identityChanged => (
+          'Session changed',
+          'Return to My Reports and open the report again.',
+        ),
+        _ => ('Unable to load report', 'Check your connection and try again.'),
+      };
+      return Scaffold(
+        appBar: _reportDetailsAppBar(),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 540),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
+              children: [
+                _PreviewMessageState(
+                  title: title,
+                  description: description,
+                  showProgress: state.status == ReportDetailsStatus.loading,
+                ),
+                if (state.status != ReportDetailsStatus.loading &&
+                    _loader.canRetry)
+                  TextButton(
+                    key: const Key('report-details-retry'),
+                    onPressed: _loader.load,
+                    child: const Text('Retry'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
 class _ReportDetailsScreen extends StatelessWidget {
-  const _ReportDetailsScreen({required this.report});
+  const _ReportDetailsScreen({required this.report, this.attachedPhotos});
   final ReportRecord report;
+  final Widget? attachedPhotos;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Report Details',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 18),
-            child: Center(child: _DemoPill()),
-          ),
-        ],
-      ),
+      appBar: _reportDetailsAppBar(),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 540),
@@ -1016,7 +1183,10 @@ class _ReportDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         const Spacer(),
-                        _StatusBadge(report.status),
+                        _StatusBadge(
+                          report.status,
+                          key: const Key('report-details-status'),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 21),
@@ -1072,11 +1242,13 @@ class _ReportDetailsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _DetailSection(
                 heading: 'Attached Photos',
-                child: DemoAttachedPhotos(
-                  photos: report.id == 'CSR-2026-001'
-                      ? DemoReportPhoto.samples
-                      : const [],
-                ),
+                child:
+                    attachedPhotos ??
+                    DemoAttachedPhotos(
+                      photos: report.id == 'CSR-2026-001'
+                          ? DemoReportPhoto.samples
+                          : const [],
+                    ),
               ),
               const SizedBox(height: 20),
               _DetailSection(
